@@ -195,10 +195,26 @@ function deleteSavedResult(id) {
   renderSavedCollections();
 }
 
+function makeVideoNarration(title, description) {
+  const cleanTitle = String(title || "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, "");
+  const cleanDescription = String(description || "").replace(/\s+/g, " ").trim();
+  const fullText = [cleanTitle, cleanDescription].filter(Boolean).join(". ");
+  if (fullText.length <= 280) return fullText;
+  const clipped = fullText.slice(0, 280);
+  const sentenceEnd = Math.max(clipped.lastIndexOf(". "), clipped.lastIndexOf("! "), clipped.lastIndexOf("? "));
+  if (sentenceEnd >= Math.min(cleanTitle.length + 30, 200)) return clipped.slice(0, sentenceEnd + 1).trim();
+  const wordEnd = clipped.lastIndexOf(" ");
+  return `${clipped.slice(0, wordEnd > 0 ? wordEnd : 280).replace(/[ ,;:]+$/, "")}.`;
+}
+
 function restoreSavedResult(id) {
   const record = readSavedResults().find((item) => item.id === id);
   if (!record) return;
-  const data = record.productData;
+  const data = {
+    ...record.productData,
+    headline: record.productData.headline || record.productData.title || "",
+    narration: record.productData.narration || makeVideoNarration(record.productData.title, record.productData.description),
+  };
   const ready = () => {
     productData = data;
     activeSavedResultId = record.id;
@@ -210,8 +226,6 @@ function restoreSavedResult(id) {
     $("#selectedPhotoLabel").textContent = record.photoLabel || "Hasil dari Histori";
     $("#title").textContent = data.title || "";
     $("#description").textContent = data.description || "";
-    $("#keywords").textContent = (data.keywords || []).join(", ");
-    $("#narration").textContent = data.narration || "";
     $("#count").textContent = `${(data.title || "").length} karakter`;
     $("#downloadVideo").disabled = videoExportBusy || !data.narration || !image;
     $("#backToPhotos").disabled = true;
@@ -467,8 +481,6 @@ function resetGeneratedCopy() {
   clearVideoDownload();
   $("#title").textContent = "Judul SEO muncul di sini.";
   $("#description").textContent = "Deskripsi muncul di sini.";
-  $("#keywords").textContent = "Kata kunci muncul di sini.";
-  $("#narration").textContent = "Narasi muncul di sini.";
   $("#count").textContent = "0 karakter";
   $("#downloadVideo").disabled = true;
 }
@@ -538,7 +550,7 @@ function selectAiPhoto(index) {
   resetGeneratedCopy();
   $("#bgBadge").textContent = `${AI_PHOTO_VARIANTS[index].title} dipilih`;
   $("#status").textContent = "Membuat SEO dari foto pilihan…";
-  $("#videoStatus").textContent = "SEO dan narasi sedang disiapkan.";
+  $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
   $("#generate").textContent = "Buat SEO";
   renderAiPhotoGallery();
@@ -789,7 +801,7 @@ $("#generate").onclick = async () => {
   const retrying = !button.hidden;
   button.disabled = true;
   if (retrying) button.textContent = "Mencoba lagi…";
-  $("#status").textContent = "Menyiapkan judul, deskripsi, dan narasi…";
+  $("#status").textContent = "Membuat judul dan deskripsi singkat…";
   $("#status").classList.add("isLoading");
   $("#status").setAttribute("aria-busy", "true");
   renderAiPhotoGallery();
@@ -801,17 +813,21 @@ $("#generate").onclick = async () => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
     if (requestId !== seoGeneration || runId !== uploadGeneration) return;
-    productData = result;
+    productData = {
+      title: String(result.title || ""),
+      description: String(result.description || ""),
+      headline: String(result.title || "Produk pilihan Anda"),
+      keywords: [],
+      narration: makeVideoNarration(result.title, result.description),
+    };
     button.hidden = true;
     button.textContent = "Buat SEO";
     const savedLocally = saveCurrentResult();
     $("#title").textContent = result.title || "";
     $("#description").textContent = result.description || "";
-    $("#keywords").textContent = (result.keywords || []).join(", ");
-    $("#narration").textContent = result.narration || "";
     $("#count").textContent = `${(result.title || "").length} karakter`;
     renderAll();
-    $("#downloadVideo").disabled = videoExportBusy || !result.narration;
+    $("#downloadVideo").disabled = videoExportBusy || !productData.narration;
     $("#videoStatus").textContent = "Siap: satu ketukan membuat dan mengunduh video Shorts bersuara AI.";
     $("#status").textContent = savedLocally
       ? "Selesai. Hasil tersimpan di Hasil Saya pada perangkat ini. Tinjau kembali sebelum digunakan."
@@ -972,12 +988,11 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 });
 
 $("#copyAll").onclick = async () => {
-  const text = ["Judul Produk", $("#title").textContent, "Deskripsi", $("#description").textContent,
-    "Kata kunci", $("#keywords").textContent, "Narasi", $("#narration").textContent].join("\n\n");
+  const text = ["Judul Produk", $("#title").textContent, "Deskripsi", $("#description").textContent].join("\n\n");
   try {
     await navigator.clipboard.writeText(text);
     $("#copyAll").textContent = "Tersalin";
-    setTimeout(() => { $("#copyAll").textContent = "Salin Semua Teks"; }, 1200);
+    setTimeout(() => { $("#copyAll").textContent = "Salin judul dan deskripsi"; }, 1200);
   } catch { alert(text); }
 };
 
@@ -1018,7 +1033,7 @@ installButton.onclick = async () => {
 window.addEventListener("appinstalled", () => {
   installButton.hidden = true;
   installMessage.hidden = false;
-  installMessage.textContent = "Foto SEO sudah terpasang.";
+  installMessage.textContent = "CEO Shopee sudah terpasang.";
 });
 
 if ("serviceWorker" in navigator) {

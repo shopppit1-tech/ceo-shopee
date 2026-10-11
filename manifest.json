@@ -2,7 +2,7 @@
   "id": "./",
   "name": "CEO Shopee",
   "short_name": "CEO Shopee",
-  "description": "Buat tiga foto produk AI, teks SEO, banner, dan video Shorts bersuara melalui tiga tab sederhana.",
+  "description": "Buat foto produk AI, judul dan deskripsi Shopee, banner, serta video promosi MP4 bersuara.",
   "lang": "id",
   "start_url": "./",
   "scope": "./",
@@ -10,6 +10,9 @@
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#f7f5fc",
   "theme_color": "#6427ed",
-  "icons": [],
+  "icons": [
+    { "src": "./icons/ceo-shopee-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/ceo-shopee-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
   "prefer_related_applications": false
 }

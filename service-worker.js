@@ -1,6 +1,6 @@
-const CACHE_NAME = "foto-seo-shopee-pages-v1";
+const CACHE_NAME = "foto-seo-shopee-pages-v3";
 const APP_BASE = new URL("./", self.registration.scope);
-const APP_SHELL = ["", "manifest.json", "app.js"].map((path) => new URL(path, APP_BASE).href);
+const APP_SHELL = ["", "manifest.json", "app.js", "icons/ceo-shopee-192.png", "icons/ceo-shopee-512.png"].map((path) => new URL(path, APP_BASE).href);
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {

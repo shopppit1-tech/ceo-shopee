@@ -11,6 +11,8 @@
   <meta name="description" content="Buat foto produk AI, banner, SEO, dan video Shorts bersuara dalam tiga langkah sederhana.">
   <title>CEO Shopee</title>
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/ceo-shopee-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./icons/ceo-shopee-192.png">
   <style>
     :root{--primary:#5b3cc4;--primary-dark:#4526a8;--mint:#08a879;--ink:#1e1b31;--muted:#6b6879;--line:#e9e6f2;--surface:#fff;--bg:#f6f5fa}
     *{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);min-height:100vh}
@@ -122,14 +124,12 @@
       </div>
 
       <div class="panel">
-        <h2 style="font-size:17px;margin:0 0 12px">Teks produk Shopee</h2>
+        <h2 style="font-size:17px;margin:0 0 12px">Judul dan deskripsi Shopee</h2>
         <div class="seoGrid">
           <div class="seoField"><div class="seoHead"><strong>Judul Produk</strong><button class="copy" data-copy="title" type="button">Salin</button></div><div class="seoText" id="title">Judul SEO muncul di sini.</div><div id="count" class="status">0 karakter</div></div>
           <div class="seoField"><div class="seoHead"><strong>Deskripsi</strong><button class="copy" data-copy="description" type="button">Salin</button></div><div class="seoText" id="description">Deskripsi muncul di sini.</div></div>
-          <div class="seoField"><div class="seoHead"><strong>Kata kunci</strong><button class="copy" data-copy="keywords" type="button">Salin</button></div><div class="seoText" id="keywords">Kata kunci muncul di sini.</div></div>
-          <div class="seoField"><div class="seoHead"><strong>Narasi video</strong><button class="copy" data-copy="narration" type="button">Salin</button></div><div class="seoText" id="narration">Narasi muncul di sini.</div></div>
         </div>
-        <div class="screenActions"><button class="btn outline full" id="copyAll" type="button">Salin semua teks</button></div>
+        <div class="screenActions"><button class="btn outline full" id="copyAll" type="button">Salin judul dan deskripsi</button></div>
       </div>
 
       <div class="panel">
@@ -138,7 +138,7 @@
         <div class="videoBox"><canvas id="videoCanvas" width="720" height="1280"></canvas></div>
         <div class="screenActions"><button class="btn primary full" id="downloadVideo" type="button" disabled aria-busy="false"><span class="videoSpinner" id="videoLoadingSpinner" aria-hidden="true" hidden></span><span id="downloadVideoLabel">Buat & unduh video MP4</span></button></div>
         <div class="screenActions" id="videoDownloadActions" hidden><a class="btn outline full videoDownloadLink" id="videoDownloadLink" href="#" download="video-shorts-dengan-narasi-ai.mp4" hidden>Unduh MP4</a></div>
-        <div class="status" id="videoStatus" role="status" aria-live="polite">SEO dan narasi sedang disiapkan.</div>
+        <div class="status" id="videoStatus" role="status" aria-live="polite">Judul dan deskripsi sedang disiapkan.</div>
       </div>
       <div class="screenActions"><button class="btn outline" id="backToPhotos" type="button">Pilih foto AI lain</button><button class="btn outline" id="changePhoto" type="button">Produk baru</button></div>
     </section>
