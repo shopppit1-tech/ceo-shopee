@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Foto & SEO untuk Shopee",
+  "short_name": "Foto & SEO",
+  "description": "Buat tiga foto produk AI, teks SEO, banner, dan video Shorts bersuara melalui tiga tab sederhana.",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#f7f5fc",
+  "theme_color": "#6427ed",
+  "icons": [],
+  "prefer_related_applications": false
+}
