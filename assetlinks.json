@@ -1,15 +1,11 @@
-
 [
   {
-    "relation": [
-      "delegate_permission/common.handle_all_urls"
-    ],
+    "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
       "package_name": "io.github.shopppit1_tech.twa",
-      "sha256_cert_fingerprints": [
-        "CD:95:67:45:E9:0C:15:27:FE:CA:B0:2C:FC:B2:DC:DB:D1:B8:2A:0A:59:77:B5:05:6A:BE:FD:A6:78:F8:33:70"
-      ]
+      "sha256_cert_fingerprints":
+        ["CD:95:67:45:E9:0C:15:27:FE:CA:B0:2C:FC:B2:DC:DB:D1:B8:2A:0A:59:77:B5:05:6A:BE:FD:A6:78:F8:33:70"]
     }
   }
 ]
