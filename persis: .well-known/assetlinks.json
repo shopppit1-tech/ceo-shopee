@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.shoppit1_tech.twa",
+      "sha256_cert_fingerprints":
+        ["E8:90:22:6A:18:2C:F2:8C:B5:96:B7:F3:7D:AC:DD:6E:DB:A0:F3:FE:49:9B:96:E6:06:93:47:F2:F3:90:6E:0E"]
+    }
+  }
+]
