@@ -1092,16 +1092,24 @@ $("#generate").onclick = async () => {
 function autoGenerateVideo(runId = uploadGeneration) {
   if (autoVideoStartedRun === runId || videoExportBusy || !productData?.narration) return;
   autoVideoStartedRun = runId;
-  $("#videoStatus").textContent = "CEO selesai. Video Shorts sedang dibuat otomatis…";
+  const videoButton = $("#downloadVideo");
+  const videoSpinner = $("#videoLoadingSpinner");
+  const videoStatus = $("#videoStatus");
+  videoSpinner.hidden = false;
+  videoButton.setAttribute("aria-busy", "true");
+  videoStatus.classList.add("isLoading");
+  videoStatus.setAttribute("aria-busy", "true");
+  videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis…";
   setTimeout(() => {
-    if (runId === uploadGeneration && productData?.narration && !videoExportBusy) $("#downloadVideo").click();
-  }, 350);
+    if (runId === uploadGeneration && productData?.narration) videoButton.click();
+  }, 100);
 }
 
 $("#downloadVideo").onclick = async () => {
   if (!image || !productData?.narration) return;
   if (!$("#videoCanvas").captureStream || !window.MediaRecorder) {
-    $("#videoStatus").textContent = "Ekspor video bersuara memerlukan browser Chrome atau Edge terbaru.";
+    $("#videoStatus").textContent = "Browser ini tidak mendukung pembuatan video otomatis. Gunakan Chrome atau Edge terbaru.";
+    setVideoLoading(false);
     return;
   }
 
