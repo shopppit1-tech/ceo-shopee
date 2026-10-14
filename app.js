@@ -629,7 +629,7 @@ function setVideoLoading(busy, label = "Buat & unduh video MP4") {
   status.classList.toggle("isLoading", busy);
   status.setAttribute("aria-busy", String(busy));
   text.textContent = busy ? label : "Buat & unduh video MP4";
-  button.disabled = busy || !productData?.narration;
+  button.disabled = busy || !image || !productData?.narration;
 }
 
 function clearVideoDownload() {
@@ -679,13 +679,21 @@ function downloadBlob(blob, filename) {
 }
 
 function autoGenerateCeoIfReady(runId = uploadGeneration) {
-  if (autoCeoStartedRun === runId || seoRequestBusy || productData || !getProductName()) return;
+  if (autoCeoStartedRun === runId || seoRequestBusy || productData) return;
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount < 1) return;
+  if (!getProductName()) {
+    $("#editStatus").textContent = "Foto AI siap. Isi nama produk untuk membuat CEO dan video otomatis.";
+    $("#editStatus").classList.remove("isLoading");
+    $("#editStatus").setAttribute("aria-busy", "false");
+    return;
+  }
   const index = aiPhotos.findIndex(Boolean);
   autoCeoStartedRun = runId;
   if (selectedVariantIndex !== index) selectAiPhoto(index);
-  $("#status").textContent = "Foto siap. AI sedang membuat CEO otomatis…";
+  $("#status").textContent = "Foto siap. CEO sedang dibuat otomatis: AI menyiapkan judul dan deskripsi produk…";
+  $("#status").classList.add("isLoading");
+  $("#status").setAttribute("aria-busy", "true");
   setTimeout(() => {
     if (runId !== uploadGeneration || seoRequestBusy || productData) return;
     const action = $("#generate").onclick;
@@ -725,10 +733,11 @@ async function generateAiPhotos(file, runId) {
   $("#retryAiEdits").hidden = true;
   $("#retryAiEdits").disabled = true;
   const total = AI_PHOTO_VARIANTS.length;
-  $("#editStatus").textContent = `Tekan tombol Buat Foto dengan AI untuk menghasilkan satu foto.`;
+  let finished = aiPhotos.filter(Boolean).length;
+  $("#editStatus").textContent = `Membuat foto AI… (${finished}/${total} siap, ${total - finished} diproses)`;
   $("#editStatus").classList.add("isLoading");
-  $("#editStatus").style.setProperty("--progress", "0%");
-  let finished = 0;
+  $("#editStatus").setAttribute("aria-busy", "true");
+  $("#editStatus").style.setProperty("--progress", `${Math.round((finished / total) * 100)}%`);
   const jobs = AI_PHOTO_VARIANTS.map(async (variant, index) => {
     if (runId !== uploadGeneration || aiPhotos[index]) return;
     aiPhotoErrors[index] = null;
@@ -768,7 +777,7 @@ async function generateAiPhotos(file, runId) {
         finished += 1;
         const ready = aiPhotos.filter(Boolean).length;
         $("#editStatus").style.setProperty("--progress", `${Math.round((finished / total) * 100)}%`);
-        $("#editStatus").textContent = `Foto AI siap ${ready}/${total}${finished < total ? ` · ${total - finished} masih diproses…` : ""}`;
+        $("#editStatus").textContent = `Foto AI: ${ready}/${total} siap · ${finished}/${total} pekerjaan selesai${finished < total ? ` · ${total - finished} masih diproses…` : ""}`;
         renderAiPhotoGallery();
       }
     }
@@ -777,6 +786,7 @@ async function generateAiPhotos(file, runId) {
   await Promise.all(jobs);
   if (runId !== uploadGeneration) return;
   $("#editStatus").classList.remove("isLoading");
+  $("#editStatus").setAttribute("aria-busy", "false");
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
     $("#editStatus").textContent = "Foto AI siap. CEO dan video dibuat otomatis.";
@@ -815,6 +825,8 @@ $("#photo").onchange = (event) => {
   const runId = ++uploadGeneration;
   autoCeoStartedRun = 0;
   autoVideoStartedRun = 0;
+  $("#editStatus").classList.remove("isLoading");
+  $("#editStatus").setAttribute("aria-busy", "false");
   if (imageUrl) URL.revokeObjectURL(imageUrl);
   aiPhotoUrls.forEach((url) => url && URL.revokeObjectURL(url));
   aiPhotoUrls = [];
@@ -884,10 +896,12 @@ $("#generateAiPhotosButton").onclick = async () => {
   if (!sourceFile || seoRequestBusy) return;
   const button = $("#generateAiPhotosButton");
   button.disabled = true;
-  button.textContent = "Membuat foto AI…";
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "Membuat 3 foto AI…";
   await generateAiPhotos(sourceFile, uploadGeneration);
   button.hidden = true;
-  button.textContent = "Buat Foto dengan AI";
+  button.textContent = "Buat Semua Otomatis";
+  button.setAttribute("aria-busy", "false");
 };
 $("#retryAiEdits").onclick = async () => {
   if (!sourceFile) return;
@@ -1017,10 +1031,10 @@ $("#generate").onclick = async () => {
   const runId = uploadGeneration;
   seoRequestBusy = true;
   const button = $("#generate");
-  const retrying = !button.hidden;
   button.disabled = true;
-  if (retrying) button.textContent = "Mencoba lagi…";
-  $("#status").textContent = "Membuat judul dan deskripsi singkat…";
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "Membuat CEO…";
+  $("#status").textContent = "Membuat CEO: AI sedang menyiapkan judul dan deskripsi produk…";
   $("#status").classList.add("isLoading");
   $("#status").setAttribute("aria-busy", "true");
   renderAiPhotoGallery();
@@ -1033,6 +1047,7 @@ $("#generate").onclick = async () => {
       button.disabled = true;
       button.hidden = false;
       $("#status").classList.remove("isLoading");
+      $("#status").setAttribute("aria-busy", "false");
       $("#status").textContent = "Nama produk wajib diisi agar AI tidak salah mengenali kemasan sebagai produk.";
       seoRequestBusy = false;
       return;
@@ -1041,6 +1056,7 @@ $("#generate").onclick = async () => {
       button.disabled = true;
       button.hidden = false;
       $("#status").classList.remove("isLoading");
+      $("#status").setAttribute("aria-busy", "false");
       $("#status").textContent = "Ketik nama produk agar AI dapat membuat konten CEO.";
       seoRequestBusy = false;
       return;
@@ -1062,6 +1078,7 @@ $("#generate").onclick = async () => {
     };
     button.hidden = true;
     button.textContent = "Buat CEO";
+    button.setAttribute("aria-busy", "false");
     const savedLocally = saveCurrentResult();
     $("#title").textContent = faithfulCopy.title;
     $("#description").textContent = faithfulCopy.description;
@@ -1076,6 +1093,8 @@ $("#generate").onclick = async () => {
     autoGenerateVideo(runId);
   } catch (error) {
     if (requestId === seoGeneration && runId === uploadGeneration) {
+      $("#status").classList.remove("isLoading");
+      $("#status").setAttribute("aria-busy", "false");
       $("#status").textContent = error.message;
       button.hidden = false;
       button.textContent = "Coba lagi menyiapkan judul";
@@ -1085,6 +1104,8 @@ $("#generate").onclick = async () => {
       seoRequestBusy = false;
       $("#status").classList.remove("isLoading");
       $("#status").setAttribute("aria-busy", "false");
+      button.setAttribute("aria-busy", "false");
+      if (button.textContent === "Membuat CEO…") button.textContent = "Buat CEO";
       button.disabled = !aiPhotos.some(Boolean) || !getProductName() || !getProductContext();
       renderAiPhotoGallery();
     }
@@ -1095,22 +1116,28 @@ function autoGenerateVideo(runId = uploadGeneration) {
   if (autoVideoStartedRun === runId || videoExportBusy || !productData?.narration) return;
   autoVideoStartedRun = runId;
   const videoButton = $("#downloadVideo");
-  const videoSpinner = $("#videoLoadingSpinner");
   const videoStatus = $("#videoStatus");
-  videoSpinner.hidden = false;
-  videoButton.setAttribute("aria-busy", "true");
-  videoStatus.classList.add("isLoading");
-  videoStatus.setAttribute("aria-busy", "true");
-  videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis…";
+  setVideoLoading(true, "Menyiapkan video otomatis…");
+  videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis dengan narasi AI…";
   setTimeout(() => {
-    if (runId !== uploadGeneration || !productData?.narration) return;
+    if (runId !== uploadGeneration || !productData?.narration || !image) {
+      if (runId === uploadGeneration) {
+        videoStatus.textContent = "Video belum dapat dibuat. Pastikan foto dan konten CEO sudah siap.";
+        setVideoLoading(false);
+      }
+      return;
+    }
     const action = videoButton.onclick;
     if (typeof action === "function") action.call(videoButton);
   }, 100);
 }
 
 $("#downloadVideo").onclick = async () => {
-  if (!image || !productData?.narration) return;
+  if (!image || !productData?.narration) {
+    $("#videoStatus").textContent = "Video memerlukan foto dan hasil CEO. Buat CEO terlebih dahulu.";
+    setVideoLoading(false);
+    return;
+  }
   if (!$("#videoCanvas").captureStream || !window.MediaRecorder) {
     $("#videoStatus").textContent = "Browser ini tidak mendukung pembuatan video otomatis. Gunakan Chrome atau Edge terbaru.";
     setVideoLoading(false);

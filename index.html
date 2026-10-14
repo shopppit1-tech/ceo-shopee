@@ -169,6 +169,15 @@
     .featureCardBanner,.featureCardTemplate{position:relative;overflow:hidden}.miniBannerPreview{height:59px;margin:-3px -2px 12px;padding:9px 8px;position:relative;border-radius:10px;background:linear-gradient(120deg,#6021ed,#c544ed);color:#fff;overflow:hidden}.miniBannerPreview::after{content:"";position:absolute;right:8px;top:10px;width:38px;height:45px;border:2px solid #fff9;border-radius:6px;transform:rotate(12deg);background:#ffffff33}.miniBannerPreview b{position:relative;z-index:1;display:block;font-size:8px;letter-spacing:1px}.miniBannerPreview span{position:relative;z-index:1;display:block;margin-top:4px;font-size:8px;line-height:1.05;font-weight:800}.miniBannerPreview i{position:absolute;right:11px;bottom:6px;z-index:2;font-size:9px;font-style:normal;font-weight:900}.miniTemplatePreview{height:59px;margin:-3px -2px 12px;padding:7px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px;position:relative;border-radius:10px;background:#fff6eb}.miniTemplatePreview b{display:block;border-radius:4px;background:linear-gradient(145deg,#ffb55b,#fff0dc);border:1px solid #ffd09d}.miniTemplatePreview b:nth-child(2){background:linear-gradient(145deg,#ceb7ff,#f0e9ff)}.miniTemplatePreview b:nth-child(3){background:linear-gradient(145deg,#a8efe0,#e5fffa)}.miniTemplatePreview b:nth-child(4){background:linear-gradient(145deg,#ffadcf,#fff0f6)}.miniTemplatePreview span{position:absolute;right:9px;bottom:7px;color:#ec8214;font-size:15px;text-shadow:0 1px #fff}
     .bottomTabs{left:0;right:0;bottom:0;max-width:none;margin:0;border-radius:22px 22px 0 0;padding:7px 12px calc(7px + env(safe-area-inset-bottom));border-bottom:0;box-shadow:0 -4px 18px #24143b18}.bottomTabsInner{max-width:900px}
     @media(max-width:430px){.bottomTabs{border-radius:18px 18px 0 0;padding-left:7px;padding-right:7px}}
+    /* Indikator proses bersama: Foto AI, CEO, dan video memakai bahasa visual yang sama. */
+    #editStatus.isLoading,#status.isLoading,#videoStatus.isLoading{position:relative;display:flex;align-items:flex-start;gap:10px;min-height:52px;padding:12px 14px 15px 44px;border:1px solid #e5dcfa;border-radius:14px;background:linear-gradient(120deg,#fff 0%,#f8f4ff 62%,#f0fff8 100%);color:#4c3b76;font-weight:650;line-height:1.5;box-shadow:0 5px 15px #5122a30c}
+    #editStatus.isLoading::before,#status.isLoading::before,#videoStatus.isLoading::before{content:"";position:absolute;left:14px;top:14px;width:18px;height:18px;border:3px solid #eee8ff;border-top-color:var(--primary);border-right-color:var(--mint);border-radius:50%;animation:video-spin .85s linear infinite;margin:0}
+    #editStatus.isLoading::after,#status.isLoading::after,#videoStatus.isLoading::after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:3px;border-radius:9px;background:linear-gradient(90deg,var(--primary),var(--mint));transform-origin:left;animation:task-progress 1.35s ease-in-out infinite alternate}
+    #editStatus.isLoading{padding-bottom:17px;overflow:hidden}
+    #editStatus.isLoading::after{left:0;right:auto;bottom:0;width:var(--progress,0%);height:4px;border-radius:0 0 12px 12px;transform:none;animation:none;transition:width .25s ease}
+    #downloadVideo[aria-busy="true"]:disabled{opacity:.94;cursor:progress}
+    @keyframes task-progress{from{transform:scaleX(.12);opacity:.5}to{transform:scaleX(.82);opacity:1}}
+    @media(prefers-reduced-motion:reduce){#editStatus.isLoading::before,#status.isLoading::before,#videoStatus.isLoading::before{animation-duration:1.5s}#status.isLoading::after,#videoStatus.isLoading::after{animation-duration:2.2s}}
   </style>
 </head>
 <body class="auth-locked">
@@ -248,7 +257,7 @@
         <div class="videoBox"><canvas id="videoCanvas" width="720" height="1280"></canvas></div>
         <div class="screenActions"><button class="btn primary full" id="downloadVideo" type="button" disabled aria-busy="false"><span class="videoSpinner" id="videoLoadingSpinner" aria-hidden="true" hidden></span><span id="downloadVideoLabel">Buat & unduh video MP4</span></button></div>
         <div class="screenActions" id="videoDownloadActions" hidden><a class="btn outline full videoDownloadLink" id="videoDownloadLink" href="#" download="video-shorts-dengan-narasi-ai.mp4" hidden>Unduh MP4</a></div>
-        <div class="status" id="videoStatus" role="status" aria-live="polite">Sedang diproses…</div>
+        <div class="status" id="videoStatus" role="status" aria-live="polite" aria-busy="false">Video akan diproses otomatis setelah CEO selesai dibuat.</div>
       </div>
 
       <div class="panel resultTop"><img id="selectedPhotoPreview" alt="Foto AI terpilih"><div><strong id="selectedPhotoLabel">Foto AI terpilih</strong><small>Dipakai untuk banner, SEO, dan video</small></div></div>
