@@ -694,7 +694,7 @@ function selectAiPhoto(index) {
   $("#selectedPhotoLabel").textContent = AI_PHOTO_VARIANTS[index].title;
   resetGeneratedCopy();
   $("#bgBadge").textContent = `${AI_PHOTO_VARIANTS[index].title} dipilih`;
-  $("#status").textContent = "Membuat SEO dari foto pilihan…";
+  $("#status").textContent = "Foto dipilih. Isi nama produk, lalu tekan Buat SEO.";
   $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
   $("#generateAiPhotosButton").hidden = true;
@@ -828,6 +828,7 @@ $("#photo").onchange = (event) => {
     showScreen(2);
     renderAiPhotoGallery();
     renderAll();
+    $("#generateAiPhotosButton").hidden = false;
     $("#generateAiPhotosButton").disabled = false;
   };
   nextImage.onerror = () => {
