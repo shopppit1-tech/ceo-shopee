@@ -67,7 +67,8 @@ function setActiveMenu(menuName) {
 
 function showScreen(step) {
   activeStep = step;
-  document.querySelector(".stepper").hidden = step > 3;
+  const stepper = document.querySelector(".stepper");
+  if (stepper) stepper.hidden = step > 3;
   document.querySelectorAll(".screen").forEach((screen, index) => { screen.hidden = index + 1 !== step; });
   document.querySelectorAll(".stepper [data-step]").forEach((item) => {
     const number = Number(item.dataset.step);
