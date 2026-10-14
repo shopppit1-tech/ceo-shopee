@@ -297,6 +297,7 @@ function restoreSavedResult(id) {
   };
   const ready = () => {
     productData = data;
+    setVideoStage("reset");
     activeSavedResultId = record.id;
     selectedVariantIndex = null;
     sourceFile = null;
@@ -618,6 +619,50 @@ function saveCanvas(canvas, filename) {
   anchor.click();
 }
 
+const VIDEO_STAGE_NAMES = ["narration", "render", "convert"];
+let activeVideoStage = null;
+function setVideoStage(stage) {
+  const container = $("#videoProgressStages");
+  if (!container) return;
+  const items = [...container.querySelectorAll("[data-video-stage]")];
+  if (stage === "reset" || !stage) {
+    activeVideoStage = null;
+    container.hidden = true;
+    items.forEach((item) => {
+      item.classList.remove("active", "complete", "error");
+      item.removeAttribute("aria-current");
+    });
+    return;
+  }
+  if (stage !== "done" && stage !== "error") activeVideoStage = stage;
+  container.hidden = false;
+  const currentIndex = stage === "done" ? items.length : VIDEO_STAGE_NAMES.indexOf(activeVideoStage);
+  items.forEach((item, index) => {
+    const isCurrent = index === currentIndex;
+    item.classList.toggle("active", stage !== "error" && isCurrent);
+    item.classList.toggle("complete", stage === "done" || index < currentIndex);
+    item.classList.toggle("error", stage === "error" && isCurrent);
+    if (isCurrent && stage !== "done") item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
+  });
+}
+
+async function requestTtsAudio(text, provider = "", timeoutMs = 100_000) {
+  const body = { text };
+  if (provider) body.provider = provider;
+  const response = await fetch(apiUrl("/api/tts"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || "Narasi AI gagal dibuat; coba lagi sebentar.");
+  }
+  return response;
+}
+
 function setVideoLoading(busy, label = "Buat & unduh video MP4") {
   const button = $("#downloadVideo");
   const spinner = $("#videoLoadingSpinner");
@@ -647,6 +692,7 @@ function clearVideoDownload() {
 function resetGeneratedCopy() {
   productData = null;
   clearVideoDownload();
+  setVideoStage("reset");
   $("#title").textContent = "Judul SEO muncul di sini.";
   $("#description").textContent = "Deskripsi muncul di sini.";
   $("#count").textContent = "0 karakter";
@@ -1117,14 +1163,18 @@ function autoGenerateVideo(runId = uploadGeneration) {
   autoVideoStartedRun = runId;
   const videoButton = $("#downloadVideo");
   const videoStatus = $("#videoStatus");
+  setVideoStage("narration");
   setVideoLoading(true, "Menyiapkan video otomatis…");
   videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis dengan narasi AI…";
   setTimeout(() => {
-    if (runId !== uploadGeneration || !productData?.narration || !image) {
-      if (runId === uploadGeneration) {
-        videoStatus.textContent = "Video belum dapat dibuat. Pastikan foto dan konten CEO sudah siap.";
-        setVideoLoading(false);
-      }
+    if (runId !== uploadGeneration) {
+      setVideoLoading(false);
+      return;
+    }
+    if (!productData?.narration || !image) {
+      videoStatus.textContent = "Video belum dapat dibuat. Pastikan foto dan konten CEO sudah siap.";
+      setVideoStage("error");
+      setVideoLoading(false);
       return;
     }
     const action = videoButton.onclick;
@@ -1135,11 +1185,13 @@ function autoGenerateVideo(runId = uploadGeneration) {
 $("#downloadVideo").onclick = async () => {
   if (!image || !productData?.narration) {
     $("#videoStatus").textContent = "Video memerlukan foto dan hasil CEO. Buat CEO terlebih dahulu.";
+    setVideoStage("reset");
     setVideoLoading(false);
     return;
   }
   if (!$("#videoCanvas").captureStream || !window.MediaRecorder) {
     $("#videoStatus").textContent = "Browser ini tidak mendukung pembuatan video otomatis. Gunakan Chrome atau Edge terbaru.";
+    setVideoStage("reset");
     setVideoLoading(false);
     return;
   }
@@ -1147,13 +1199,14 @@ $("#downloadVideo").onclick = async () => {
   const button = $("#downloadVideo");
   clearVideoDownload();
   stopVideoPreview();
+  setVideoStage("narration");
   setVideoLoading(true, "Membuat narasi…");
   let audioContext;
   let canvasStream;
   let audioStream;
   let animationFrame;
   try {
-    $("#videoStatus").textContent = "Membuat narasi AI, merender video vertikal, lalu mengonversinya ke MP4…";
+    $("#videoStatus").textContent = "Tahap 1/3 · Menghubungi layanan narasi AI…";
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) throw new Error("Browser ini tidak mendukung pemrosesan audio. Coba Chrome terbaru.");
     audioContext = new AudioContextClass();
@@ -1163,24 +1216,28 @@ $("#downloadVideo").onclick = async () => {
       throw new Error("Browser memblokir audio. Ketuk tombol Buat & unduh lagi, lalu izinkan audio untuk situs ini.");
     }
     if (audioContext.state !== "running") throw new Error("Aktifkan audio browser lalu coba buat video lagi.");
-    const ttsResponse = await fetch(apiUrl("/api/tts"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: productData.narration }),
-      signal: AbortSignal.timeout(150_000),
-    });
-    if (!ttsResponse.ok) {
-      const result = await ttsResponse.json().catch(() => ({}));
-      throw new Error(result.error || "Narasi AI gagal dibuat; coba lagi sebentar.");
+    let ttsResponse;
+    try {
+      ttsResponse = await requestTtsAudio(productData.narration);
+    } catch (primaryError) {
+      $("#videoStatus").textContent = "Narasi utama lambat atau gagal. Mencoba suara cadangan gratis Cloudflare Aura-1…";
+      try {
+        ttsResponse = await requestTtsAudio(productData.narration, "cloudflare-aura-1");
+      } catch (fallbackError) {
+        const reason = fallbackError.message || primaryError.message || "Layanan narasi belum tersedia.";
+        throw new Error(`Narasi utama dan suara cadangan gagal. ${reason}`);
+      }
     }
 
     const ttsProvider = ttsResponse.headers.get("X-TTS-Provider");
     const voiceBlob = await ttsResponse.blob();
     const audioBuffer = await audioContext.decodeAudioData(await voiceBlob.arrayBuffer());
     videoMotionDuration = audioBuffer.duration * 1000;
+    setVideoStage("render");
     setVideoLoading(true, "Merender video…");
+    $("#videoStatus").textContent = "Tahap 2/3 · Merender video dengan narasi AI…";
     if (ttsProvider === "cloudflare-aura-1") {
-      $("#videoStatus").textContent = "Kuota Gemini habis; memakai Cloudflare Aura-1 dari alokasi Workers AI gratis. Naskah tetap Bahasa Indonesia, tetapi aksen suara dapat terdengar berbeda. Merender video…";
+      $("#videoStatus").textContent = "Tahap 2/3 · Memakai suara cadangan gratis Cloudflare Aura-1; video sedang dirender.";
     }
     const source = audioContext.createBufferSource();
     const audioDestination = audioContext.createMediaStreamDestination();
@@ -1201,6 +1258,7 @@ $("#downloadVideo").onclick = async () => {
 
     recorder.ondataavailable = (event) => { if (event.data.size) chunks.push(event.data); };
     recorder.onerror = () => {
+      setVideoStage("error");
       $("#videoStatus").textContent = "Perekaman gagal. Coba Chrome atau Edge terbaru.";
       setVideoLoading(false);
     };
@@ -1208,8 +1266,9 @@ $("#downloadVideo").onclick = async () => {
       try {
         const sourceVideo = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
         if (!sourceVideo.size) throw new Error("File video kosong. Coba buat ulang.");
+        setVideoStage("convert");
         setVideoLoading(true, "Mengonversi MP4…");
-        $("#videoStatus").textContent = "Video selesai dirender. Mengonversi ke MP4…";
+        $("#videoStatus").textContent = "Tahap 3/3 · Mengonversi video ke format MP4…";
         const form = new FormData();
         const uploadVideo = new Blob([sourceVideo], { type: "video/webm" });
         form.append("video", uploadVideo, "video-shorts.webm");
@@ -1229,8 +1288,10 @@ $("#downloadVideo").onclick = async () => {
         downloadLink.href = activeVideoDownloadUrl;
         downloadLink.hidden = false;
         $("#videoDownloadActions").hidden = false;
+        setVideoStage("done");
         $("#videoStatus").textContent = "MP4 siap. Video tampil di layar; tekan Unduh MP4 untuk menyimpan.";
       } catch (error) {
+        setVideoStage("error");
         $("#videoStatus").textContent = error.message || "Konversi MP4 gagal. Coba lagi.";
       } finally {
         canvasStream?.getTracks().forEach((track) => track.stop());
@@ -1256,6 +1317,7 @@ $("#downloadVideo").onclick = async () => {
     canvasStream?.getTracks().forEach((track) => track.stop());
     audioStream?.getTracks().forEach((track) => track.stop());
     await audioContext?.close().catch(() => {});
+    setVideoStage("error");
     $("#videoStatus").textContent = error.message || "Tidak dapat membuat video bersuara.";
     setVideoLoading(false);
     if (activeStep === 3) startVideoPreview();
