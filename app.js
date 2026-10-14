@@ -715,7 +715,7 @@ async function generateAiPhotos(file, runId) {
   $("#retryAiEdits").hidden = true;
   $("#retryAiEdits").disabled = true;
   const total = AI_PHOTO_VARIANTS.length;
-  $("#editStatus").textContent = `Cloudflare AI sedang menata pencahayaan, komposisi, dan gaya untuk ${total} foto produk profesional…`;
+  $("#editStatus").textContent = `Tekan tombol Buat 3 Foto dengan AI untuk menghasilkan ${total} pilihan foto.`;
   $("#editStatus").classList.add("isLoading");
   $("#editStatus").style.setProperty("--progress", "0%");
   let finished = 0;
@@ -823,8 +823,8 @@ $("#photo").onchange = (event) => {
     $("#photoPreview").src = imageUrl;
     $("#photoPreview").hidden = false;
     $("#uploadTitle").textContent = file.name;
-    $("#bgBadge").textContent = "Foto asli · tiga variasi AI sedang dibuat";
-    $("#status").textContent = "Pilih foto AI untuk membuat SEO otomatis.";
+    $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
+    $("#status").textContent = "Foto diterima. Isi nama produk, lalu tekan Buat 3 Foto dengan AI jika diperlukan.";
     $("#videoStatus").textContent = "Buat SEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
