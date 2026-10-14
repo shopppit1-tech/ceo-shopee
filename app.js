@@ -33,6 +33,8 @@ let aiPhotoUrls = [];
 let selectedVariantIndex = null;
 let selectedStyle = "promo";
 let selectedTemplateStyle = "marketplace";
+let selectedVideoStyle = "modern";
+let selectedProductCategory = "";
 let uploadGeneration = 0;
 let seoRequestBusy = false;
 let seoGeneration = 0;
@@ -77,11 +79,58 @@ function showScreen(step) {
     if (number === step) item.setAttribute("aria-current", "step");
     else item.removeAttribute("aria-current");
   });
-  const menuByScreen = { 1: "home", 2: "home", 3: "results", 4: "history", 5: "results" };
+  const menuByScreen = { 8: "history" };
   setActiveMenu(menuByScreen[step] || "home");
-  if (step !== 3 && !videoExportBusy) stopVideoPreview();
-  if (step === 3 && !videoExportBusy) startVideoPreview();
+  if (step !== 5 && !videoExportBusy) stopVideoPreview();
+  if (step === 5 && !videoExportBusy) startVideoPreview();
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+window.showScreen = showScreen;
+
+function setProcessProgress(percent, headline, subline) {
+  const value = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  const ring = $("#processRing");
+  if (ring) {
+    ring.style.setProperty("--progress", `${value}%`);
+    ring.setAttribute("aria-valuenow", String(value));
+  }
+  if ($("#processPercent")) $("#processPercent").textContent = `${value}%`;
+  if (headline && $("#processHeadline")) $("#processHeadline").textContent = headline;
+  if (subline && $("#processSubline")) $("#processSubline").textContent = subline;
+}
+
+function setProcessTask(name, state) {
+  const task = document.querySelector(`[data-process-task="${name}"]`);
+  if (!task) return;
+  task.classList.remove("is-active", "is-done", "is-error");
+  if (state === "active") task.classList.add("is-active");
+  if (state === "done") task.classList.add("is-done");
+  if (state === "error") task.classList.add("is-error");
+  const icon = task.querySelector(".taskIcon");
+  if (icon) icon.textContent = state === "done" ? "✓" : state === "error" ? "!" : state === "active" ? "◌" : "◌";
+}
+
+function resetProcessTasks() {
+  document.querySelectorAll("[data-process-task]").forEach((task) => {
+    task.classList.remove("is-active", "is-done", "is-error");
+    const icon = task.querySelector(".taskIcon");
+    if (icon) icon.textContent = "◌";
+  });
+}
+
+function setStylePreviewImage(url) {
+  document.querySelectorAll("[data-style-photo]").forEach((preview) => {
+    const icon = preview.nextElementSibling;
+    if (url) {
+      preview.src = url;
+      preview.hidden = false;
+      if (icon) icon.hidden = true;
+    } else {
+      preview.removeAttribute("src");
+      preview.hidden = true;
+      if (icon) icon.hidden = false;
+    }
+  });
 }
 
 function readSavedResults() {
@@ -175,6 +224,8 @@ function saveCurrentResult() {
       description: String(productData.description || ""),
       keywords: Array.isArray(productData.keywords) ? productData.keywords.map(String) : [],
       narration: String(productData.narration || ""),
+      category: String(productData.category || ""),
+      videoStyle: String(productData.videoStyle || "modern"),
     },
   };
   try {
@@ -258,6 +309,7 @@ window.addEventListener("ceo-auth-user-changed", (event) => {
   if (nextUserId !== activeSavedResultsUserId) {
     activeSavedResultsUserId = nextUserId;
     $("#changePhoto").click();
+    showScreen(1);
   }
   renderSavedCollections();
   cloudSyncLoad();
@@ -298,7 +350,10 @@ function restoreSavedResult(id) {
   const ready = () => {
     productData = data;
     setVideoStage("reset");
+    clearVideoDownload();
     activeSavedResultId = record.id;
+    selectedProductCategory = String(data.category || "");
+    selectedVideoStyle = String(data.videoStyle || "modern");
     selectedVariantIndex = null;
     sourceFile = null;
     activeBlob = null;
@@ -312,7 +367,7 @@ function restoreSavedResult(id) {
     $("#backToPhotos").disabled = true;
     $("#videoStatus").textContent = "Hasil dibuka dari penyimpanan lokal perangkat ini.";
     renderAll();
-    showScreen(3);
+    showScreen(6);
   };
   if (!record.thumbnail) {
     image = null;
@@ -416,6 +471,12 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
   const canvas = $("#videoCanvas");
   const ctx = canvas.getContext("2d");
   const { width, height } = canvas;
+  const themes = {
+    modern: { background: "#211532", accent: "#c4a6ff", first: "#8b5cf6", second: "#34d399", glow: "#7c3aed", finish: "#10b981" },
+    minimal: { background: "#211f24", accent: "#fff2d7", first: "#d7b56d", second: "#f4eee2", glow: "#74634b", finish: "#cbb88e" },
+    lifestyle: { background: "#163b32", accent: "#d4f2df", first: "#43aa78", second: "#f2c078", glow: "#28785d", finish: "#d5a455" },
+  };
+  const theme = themes[selectedVideoStyle] || themes.modern;
   const p = Math.max(0, Math.min(1, progress));
   const cycle = (motionTime % 12000) / 12000;
   const smooth = (value) => value * value * (3 - 2 * value);
@@ -423,7 +484,7 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
   const moveIn = easeOut(Math.min(p / 0.16, 1));
   const reveal = Math.min(p / 0.1, 1);
   const pulse = 1 + Math.sin(cycle * Math.PI * 2) * 0.012;
-  ctx.fillStyle = "#211532";
+  ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, width, height);
 
   if (image) {
@@ -454,8 +515,8 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
     ctx.restore();
   } else {
     const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "#7c3aed");
-    gradient.addColorStop(1, "#10b981");
+    gradient.addColorStop(0, theme.glow);
+    gradient.addColorStop(1, theme.finish);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
   }
@@ -470,7 +531,7 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
   const lineProgress = Math.min(Math.max((reveal - 0.2) / 0.8, 0), 1);
   ctx.save();
   ctx.globalAlpha = reveal;
-  ctx.fillStyle = "#c4a6ff";
+  ctx.fillStyle = theme.accent;
   ctx.textAlign = "left";
   ctx.font = "800 22px system-ui";
   ctx.fillText("KENALI PRODUKNYA", width * 0.063, height * 0.75 + (1 - moveIn) * 48);
@@ -484,8 +545,8 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
   ctx.restore();
   const underlineWidth = width * 0.42 * smooth(lineProgress);
   const underline = ctx.createLinearGradient(width * 0.06, 0, width * 0.06 + underlineWidth, 0);
-  underline.addColorStop(0, "#8b5cf6");
-  underline.addColorStop(1, "#34d399");
+  underline.addColorStop(0, theme.first);
+  underline.addColorStop(1, theme.second);
   ctx.fillStyle = underline;
   ctx.fillRect(width * 0.06, headlineY + 20, underlineWidth, 6);
   ctx.font = "700 27px system-ui";
@@ -501,7 +562,7 @@ function drawVideo(progress = 0, motionTime = performance.now()) {
 }
 
 function startVideoPreview() {
-  if (videoPreviewFrame || videoExportBusy || activeStep !== 3) return;
+  if (videoPreviewFrame || videoExportBusy || activeStep !== 5) return;
   videoMotionOrigin = performance.now();
   const animate = (now) => {
     if (now - videoPreviewLastPaint >= 1000 / 30) {
@@ -521,7 +582,10 @@ function stopVideoPreview() {
 function getProductContext() {
   const name = getProductName();
   if (!name) return "";
-  return `Produk bernama ${name}. Buat deskripsi produk yang akurat berdasarkan nama dan foto, tanpa mengganti nama produk dengan nama kemasan.`;
+  const category = String($("#productCategory")?.value || "").trim();
+  const notes = String($("#productNotes")?.value || "").replace(/\s+/g, " ").trim().slice(0, 500);
+  const context = [`Produk bernama ${name}`, category && `kategori ${category}`, notes && `info dari penjual: ${notes}`].filter(Boolean).join(". ");
+  return `${context}. Buat deskripsi produk yang akurat berdasarkan informasi dan foto, tanpa mengganti nama produk dengan nama kemasan atau mengarang manfaat.`;
 }
 function syncProductContext() {
   const context = getProductContext();
@@ -647,7 +711,7 @@ function setVideoStage(stage) {
   });
 }
 
-async function requestTtsAudio(text, provider = "", timeoutMs = 100_000) {
+async function requestTtsAudio(text, provider = "", timeoutMs = 45_000) {
   const body = { text };
   if (provider) body.provider = provider;
   const response = await fetch(apiUrl("/api/tts"), {
@@ -675,6 +739,7 @@ function setVideoLoading(busy, label = "Buat & unduh video MP4") {
   status.setAttribute("aria-busy", String(busy));
   text.textContent = busy ? label : "Buat & unduh video MP4";
   button.disabled = busy || !image || !productData?.narration;
+  button.hidden = busy || !productData?.narration;
 }
 
 function clearVideoDownload() {
@@ -687,6 +752,21 @@ function clearVideoDownload() {
     link.removeAttribute("href");
   }
   if (actions) actions.hidden = true;
+  if ($("#continueToSave")) $("#continueToSave").disabled = true;
+  const finalVideo = $("#finalVideo");
+  if (finalVideo) {
+    finalVideo.pause();
+    finalVideo.removeAttribute("src");
+    finalVideo.load();
+    finalVideo.hidden = true;
+  }
+  if ($("#videoPlaceholder")) $("#videoPlaceholder").hidden = false;
+  if ($("#videoResultStatus")) $("#videoResultStatus").textContent = "Selesaikan tahap generate untuk melihat video di sini.";
+  const saveLink = $("#saveVideoLink");
+  if (saveLink) {
+    saveLink.hidden = true;
+    saveLink.removeAttribute("href");
+  }
 }
 
 function resetGeneratedCopy() {
@@ -697,6 +777,9 @@ function resetGeneratedCopy() {
   $("#description").textContent = "Deskripsi muncul di sini.";
   $("#count").textContent = "0 karakter";
   $("#downloadVideo").disabled = true;
+  $("#downloadVideo").hidden = true;
+  $("#continueToSave").disabled = true;
+  $("#skipToSeo").hidden = true;
 }
 
 function renderAiPhotoGallery() {
@@ -740,6 +823,10 @@ function autoGenerateCeoIfReady(runId = uploadGeneration) {
   $("#status").textContent = "Foto siap. CEO sedang dibuat otomatis: AI menyiapkan judul dan deskripsi produk…";
   $("#status").classList.add("isLoading");
   $("#status").setAttribute("aria-busy", "true");
+  setProcessProgress(47, "Foto siap · menyiapkan CEO", "AI mulai menyusun judul dan deskripsi produk.");
+  setProcessTask("photo", "done");
+  setProcessTask("title", "active");
+  setProcessTask("description", "active");
   setTimeout(() => {
     if (runId !== uploadGeneration || seoRequestBusy || productData) return;
     const action = $("#generate").onclick;
@@ -756,6 +843,7 @@ function selectAiPhoto(index) {
   activeBlob = photo.blob;
   activeFileName = `foto-ai-${AI_PHOTO_VARIANTS[index].key}.jpg`;
   $("#selectedPhotoPreview").src = photo.url;
+  setStylePreviewImage(photo.url);
   $("#selectedPhotoPreview").alt = AI_PHOTO_VARIANTS[index].title;
   $("#selectedPhotoLabel").textContent = AI_PHOTO_VARIANTS[index].title;
   resetGeneratedCopy();
@@ -784,6 +872,8 @@ async function generateAiPhotos(file, runId) {
   $("#editStatus").classList.add("isLoading");
   $("#editStatus").setAttribute("aria-busy", "true");
   $("#editStatus").style.setProperty("--progress", `${Math.round((finished / total) * 100)}%`);
+  setProcessProgress(8 + Math.round((finished / total) * 36), "Menganalisis foto produk", "Membuat beberapa tampilan produk dengan AI.");
+  setProcessTask("photo", "active");
   const jobs = AI_PHOTO_VARIANTS.map(async (variant, index) => {
     if (runId !== uploadGeneration || aiPhotos[index]) return;
     aiPhotoErrors[index] = null;
@@ -791,7 +881,7 @@ async function generateAiPhotos(file, runId) {
       const form = new FormData();
       form.append("photo", file, file.name);
       form.append("style", variant.key);
-      const response = await fetch(apiUrl("/api/image-edit"), { method: "POST", body: form });
+      const response = await fetch(apiUrl("/api/image-edit"), { method: "POST", body: form, signal: AbortSignal.timeout(90_000) });
       if (!response.ok) {
         const result = await response.json().catch(() => ({}));
         throw new Error(result.error || "AI gagal mengedit foto.");
@@ -824,6 +914,7 @@ async function generateAiPhotos(file, runId) {
         const ready = aiPhotos.filter(Boolean).length;
         $("#editStatus").style.setProperty("--progress", `${Math.round((finished / total) * 100)}%`);
         $("#editStatus").textContent = `Foto AI: ${ready}/${total} siap · ${finished}/${total} pekerjaan selesai${finished < total ? ` · ${total - finished} masih diproses…` : ""}`;
+        setProcessProgress(8 + Math.round((finished / total) * 36), "Menganalisis foto produk", `${ready} dari ${total} variasi foto sudah siap.`);
         renderAiPhotoGallery();
       }
     }
@@ -836,15 +927,21 @@ async function generateAiPhotos(file, runId) {
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
     $("#editStatus").textContent = "Foto AI siap. CEO dan video dibuat otomatis.";
+    setProcessTask("photo", "done");
+    setProcessProgress(45, "Foto produk siap", "Selanjutnya AI menyiapkan judul dan deskripsi.");
     $("#retryAiEdits").hidden = true;
     autoGenerateCeoIfReady(runId);
   } else if (readyCount > 0) {
     $("#editStatus").textContent = `Foto AI siap. CEO dan video dibuat otomatis dari foto yang berhasil.`;
+    setProcessTask("photo", "done");
+    setProcessProgress(45, "Foto produk siap", "Sebagian variasi siap; proses dilanjutkan dengan foto yang berhasil.");
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
     autoGenerateCeoIfReady(runId);
   } else {
     $("#editStatus").textContent = aiPhotoErrors.find(Boolean) || "Foto AI gagal dibuat. Periksa koneksi atau kuota gratis harian Cloudflare.";
+    setProcessTask("photo", "error");
+    setProcessProgress(8, "Foto belum berhasil dibuat", "Ulangi proses atau periksa koneksi layanan AI.");
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
   }
@@ -873,6 +970,8 @@ $("#photo").onchange = (event) => {
   autoVideoStartedRun = 0;
   $("#editStatus").classList.remove("isLoading");
   $("#editStatus").setAttribute("aria-busy", "false");
+  $("#continueToDetails").disabled = true;
+  $("#skipToSeo").hidden = true;
   if (imageUrl) URL.revokeObjectURL(imageUrl);
   aiPhotoUrls.forEach((url) => url && URL.revokeObjectURL(url));
   aiPhotoUrls = [];
@@ -898,28 +997,33 @@ $("#photo").onchange = (event) => {
     activeFileName = file.name;
     resetGeneratedCopy();
     $("#photoPreview").src = imageUrl;
+    setStylePreviewImage(imageUrl);
     $("#photoPreview").hidden = false;
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
-    $("#status").textContent = "Foto diterima. Isi nama produk, lalu klik Buat Semua Otomatis.";
+    $("#status").textContent = "Foto diterima. Isi judul, kategori, dan gaya video untuk melanjutkan.";
     $("#videoStatus").textContent = "Setelah CEO selesai, video Shorts dibuat otomatis dengan suara AI.";
     $("#retryAiEdits").hidden = true;
+    $("#continueToDetails").disabled = false;
+    resetProcessTasks();
+    setProcessProgress(0, "Menyiapkan proses…", "Jangan tutup halaman sampai proses selesai.");
     showScreen(2);
     renderAiPhotoGallery();
     renderAll();
     $("#generateAiPhotosButton").hidden = false;
-    $("#generateAiPhotosButton").disabled = !getProductName();
+    $("#generateAiPhotosButton").disabled = false;
     $("#generateAiPhotosButton").textContent = "Buat Semua Otomatis";
   };
   nextImage.onerror = () => {
     if (runId !== uploadGeneration) return;
     $("#uploadError").textContent = "Foto tidak dapat dibaca. Pilih gambar lain.";
-    showScreen(1);
+    $("#continueToDetails").disabled = true;
+    showScreen(2);
   };
   nextImage.src = imageUrl;
 };
 
-const photoDropZone = $(".upload");
+const photoDropZone = $(".uploadDrop");
 photoDropZone.addEventListener("dragover", (event) => {
   event.preventDefault();
   photoDropZone.classList.add("dragover");
@@ -955,11 +1059,58 @@ $("#retryAiEdits").onclick = async () => {
   await generateAiPhotos(sourceFile, uploadGeneration);
 };
 
+$("#continueToDetails").onclick = () => {
+  if (!image) {
+    $("#uploadError").textContent = "Pilih foto produk terlebih dahulu.";
+    return;
+  }
+  $("#uploadError").textContent = "";
+  showScreen(3);
+};
+
+$("#backToUploadFromDetails").onclick = () => showScreen(2);
+document.querySelectorAll("[data-video-style]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedVideoStyle = button.dataset.videoStyle || "modern";
+    document.querySelectorAll("[data-video-style]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
+    renderAll();
+  });
+});
+
+$("#startGenerate").onclick = () => {
+  if (!sourceFile || !image) {
+    showScreen(2);
+    $("#uploadError").textContent = "Pilih foto produk terlebih dahulu.";
+    return;
+  }
+  const name = getProductName();
+  if (!name) {
+    $("#detailError").textContent = "Nama produk wajib diisi agar CEO tidak salah mengenali kemasan.";
+    $("#productName").focus();
+    return;
+  }
+  $("#detailError").textContent = "";
+  selectedProductCategory = String($("#productCategory").value || "").trim();
+  selectedVideoStyle = document.querySelector("[data-video-style][aria-pressed='true']")?.dataset.videoStyle || "modern";
+  syncProductContext();
+  resetProcessTasks();
+  setProcessProgress(4, "Menganalisis foto produk", "AI menyiapkan foto, video, judul, dan deskripsi.");
+  setProcessTask("photo", "active");
+  $("#editStatus").textContent = "Memulai analisis foto produk…";
+  $("#status").textContent = "Menunggu foto AI selesai dibuat.";
+  $("#videoStatus").textContent = "Video otomatis dimulai setelah judul dan deskripsi siap.";
+  $("#generateAiPhotosButton").hidden = false;
+  $("#generateAiPhotosButton").disabled = false;
+  $("#generateAiPhotosButton").textContent = "Mulai generate foto AI";
+  showScreen(4);
+  $("#generateAiPhotosButton").click();
+};
+
 $("#backToUpload").onclick = () => {
   $("#photo").value = "";
   showScreen(1);
 };
-$("#backToPhotos").onclick = () => showScreen(2);
+$("#backToPhotos").onclick = () => showScreen(3);
 $("#changePhoto").onclick = () => {
   $("#photo").value = "";
   sourceFile = null;
@@ -975,11 +1126,34 @@ $("#changePhoto").onclick = () => {
   aiPhotos = Array(AI_PHOTO_VARIANTS.length).fill(null);
   aiPhotoErrors = Array(AI_PHOTO_VARIANTS.length).fill(null);
   $("#photoPreview").hidden = true;
+  setStylePreviewImage("");
+  $("#uploadTitle").textContent = "Pilih foto dari galeri";
+  $("#bgBadge").textContent = "JPG, PNG atau WEBP · maksimal 10 MB";
+  $("#uploadError").textContent = "";
+  $("#continueToDetails").disabled = true;
+  $("#productName").value = "";
+  $("#productNameCount").textContent = "0";
+  try { localStorage.removeItem(PRODUCT_NAME_KEY); } catch (_) {}
+  $("#productNotes").value = "";
+  $("#productCategory").value = "";
+  selectedProductCategory = "";
+  resetProcessTasks();
+  setProcessProgress(0, "Menyiapkan proses…", "Jangan tutup halaman sampai proses selesai.");
   renderAiPhotoGallery();
   resetGeneratedCopy();
   renderAll();
-  showScreen(1);
+  showScreen(2);
 };
+
+$("#skipToSeo").onclick = () => { if (productData) showScreen(6); };
+$("#cancelProcess").onclick = () => showScreen(3);
+$("#retryVideoResult").onclick = () => { showScreen(4); $("#downloadVideo").click(); };
+$("#continueToSeo").onclick = () => showScreen(6);
+$("#backToVideo").onclick = () => showScreen(5);
+$("#continueToSave").onclick = () => showScreen(7);
+$("#backToSeo").onclick = () => showScreen(6);
+$("#openSavedHistory").onclick = () => { renderSavedCollections(); showScreen(8); };
+$("#finishFlow").onclick = () => { renderSavedCollections(); showScreen(8); };
 
 document.querySelectorAll(".bottomTab").forEach((tab) => {
   tab.onclick = () => {
@@ -987,10 +1161,12 @@ document.querySelectorAll(".bottomTab").forEach((tab) => {
     if (menu === "home") showScreen(1);
     else if (menu === "history") {
       renderSavedCollections();
-      showScreen(4);
-    } else if (menu === "results") {
-      renderSavedCollections();
-      showScreen(5);
+      showScreen(8);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (menu === "profile") {
+      showScreen(8);
+      setActiveMenu("profile");
+      setTimeout(() => $("#profileSection")?.scrollIntoView({ behavior: "smooth", block: "center" }), 80);
     } else if (menu === "settings") openSettingsMenu();
   };
 });
@@ -1058,12 +1234,16 @@ const updateSeoReadiness = () => {
 };
 const savedProductName = (() => { try { return localStorage.getItem(PRODUCT_NAME_KEY) || ""; } catch (_) { return ""; } })();
 if ($("#productName") && savedProductName) $("#productName").value = savedProductName;
+if ($("#productNameCount")) $("#productNameCount").textContent = String($("#productName")?.value?.length || 0);
 $("#productName")?.addEventListener("input", () => {
   try { localStorage.setItem(PRODUCT_NAME_KEY, $("#productName").value.trim()); } catch (_) {}
+  if ($("#productNameCount")) $("#productNameCount").textContent = String($("#productName").value.length);
   updateSeoReadiness();
   $("#generateAiPhotosButton").disabled = !sourceFile || !getProductName();
   $("#generateAiPhotosButton").hidden = false;
 });
+$("#productCategory")?.addEventListener("change", () => { selectedProductCategory = $("#productCategory").value; syncProductContext(); });
+$("#productNotes")?.addEventListener("input", () => syncProductContext());
 
 $("#format").onchange = renderAll;
 
@@ -1083,6 +1263,9 @@ $("#generate").onclick = async () => {
   $("#status").textContent = "Membuat CEO: AI sedang menyiapkan judul dan deskripsi produk…";
   $("#status").classList.add("isLoading");
   $("#status").setAttribute("aria-busy", "true");
+  setProcessTask("title", "active");
+  setProcessTask("description", "active");
+  setProcessProgress(52, "Membuat judul & deskripsi", "AI sedang menulis konten produk untuk Shopee.");
   renderAiPhotoGallery();
   try {
     const form = new FormData();
@@ -1110,7 +1293,7 @@ $("#generate").onclick = async () => {
     form.append("extra", buildSeoContext(productContext));
     form.append("product_context", productContext);
     form.append("product_name", productName);
-    const response = await fetch(apiUrl("/api/seo"), { method: "POST", body: form });
+    const response = await fetch(apiUrl("/api/seo"), { method: "POST", body: form, signal: AbortSignal.timeout(90_000) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
     if (requestId !== seoGeneration || runId !== uploadGeneration) return;
@@ -1119,6 +1302,8 @@ $("#generate").onclick = async () => {
       title: faithfulCopy.title,
       description: faithfulCopy.description,
       headline: faithfulCopy.title || productName,
+      category: selectedProductCategory,
+      videoStyle: selectedVideoStyle,
       keywords: [],
       narration: makeVideoNarration(faithfulCopy.title, faithfulCopy.description),
     };
@@ -1129,19 +1314,30 @@ $("#generate").onclick = async () => {
     $("#title").textContent = faithfulCopy.title;
     $("#description").textContent = faithfulCopy.description;
     $("#count").textContent = `${faithfulCopy.title.length} karakter`;
+    $("#productNameCount").textContent = String(productName.length);
+    $("#saveStatus").textContent = savedLocally
+      ? "Hasil tersimpan di riwayat akun ini."
+      : "Konten siap. Penyimpanan riwayat tidak tersedia pada browser ini.";
+    $("#skipToSeo").hidden = false;
+    setProcessTask("title", "done");
+    setProcessTask("description", "done");
+    setProcessProgress(67, "Judul & deskripsi siap", "Video promosi sedang dibuat otomatis.");
     renderAll();
     $("#downloadVideo").disabled = videoExportBusy || !productData.narration;
     $("#videoStatus").textContent = "CEO selesai. Video Shorts akan dibuat otomatis dengan suara AI.";
     $("#status").textContent = savedLocally
       ? "Selesai. Hasil tersimpan di Hasil Saya pada perangkat ini. Tinjau kembali sebelum digunakan."
       : "Selesai. Tinjau kembali sebelum digunakan. Penyimpanan Histori browser tidak tersedia.";
-    showScreen(3);
+    showScreen(4);
     autoGenerateVideo(runId);
   } catch (error) {
     if (requestId === seoGeneration && runId === uploadGeneration) {
       $("#status").classList.remove("isLoading");
       $("#status").setAttribute("aria-busy", "false");
       $("#status").textContent = error.message;
+      setProcessTask("title", "error");
+      setProcessTask("description", "error");
+      setProcessProgress(50, "Judul belum berhasil dibuat", "Periksa pesan di bawah, lalu coba lagi.");
       button.hidden = false;
       button.textContent = "Coba lagi menyiapkan judul";
     }
@@ -1165,6 +1361,8 @@ function autoGenerateVideo(runId = uploadGeneration) {
   const videoStatus = $("#videoStatus");
   setVideoStage("narration");
   setVideoLoading(true, "Menyiapkan video otomatis…");
+  setProcessTask("video", "active");
+  setProcessProgress(70, "Membuat video promosi", "Menyiapkan narasi dan merender video vertikal.");
   videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis dengan narasi AI…";
   setTimeout(() => {
     if (runId !== uploadGeneration) {
@@ -1175,6 +1373,7 @@ function autoGenerateVideo(runId = uploadGeneration) {
       videoStatus.textContent = "Video belum dapat dibuat. Pastikan foto dan konten CEO sudah siap.";
       setVideoStage("error");
       setVideoLoading(false);
+      setProcessTask("video", "error");
       return;
     }
     const action = videoButton.onclick;
@@ -1187,12 +1386,14 @@ $("#downloadVideo").onclick = async () => {
     $("#videoStatus").textContent = "Video memerlukan foto dan hasil CEO. Buat CEO terlebih dahulu.";
     setVideoStage("reset");
     setVideoLoading(false);
+    setProcessTask("video", "error");
     return;
   }
   if (!$("#videoCanvas").captureStream || !window.MediaRecorder) {
     $("#videoStatus").textContent = "Browser ini tidak mendukung pembuatan video otomatis. Gunakan Chrome atau Edge terbaru.";
     setVideoStage("reset");
     setVideoLoading(false);
+    setProcessTask("video", "error");
     return;
   }
 
@@ -1201,19 +1402,26 @@ $("#downloadVideo").onclick = async () => {
   stopVideoPreview();
   setVideoStage("narration");
   setVideoLoading(true, "Membuat narasi…");
+  setProcessTask("video", "active");
+  setProcessProgress(72, "Membuat narasi video", "Meminta audio dari layanan AI.");
   let audioContext;
   let canvasStream;
   let audioStream;
   let animationFrame;
+  let lastProgressBucket = -1;
   try {
     $("#videoStatus").textContent = "Tahap 1/3 · Menghubungi layanan narasi AI…";
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) throw new Error("Browser ini tidak mendukung pemrosesan audio. Coba Chrome terbaru.");
     audioContext = new AudioContextClass();
     try {
-      await audioContext.resume();
+      let resumeTimer;
+      await Promise.race([
+        audioContext.resume(),
+        new Promise((_, reject) => { resumeTimer = setTimeout(() => reject(new Error("Waktu izin audio habis.")), 10_000); }),
+      ]).finally(() => clearTimeout(resumeTimer));
     } catch {
-      throw new Error("Browser memblokir audio. Ketuk tombol Buat & unduh lagi, lalu izinkan audio untuk situs ini.");
+      throw new Error("Browser belum mengizinkan audio atau melewati batas waktu. Ketuk Coba Ulang Video, lalu izinkan audio untuk situs ini.");
     }
     if (audioContext.state !== "running") throw new Error("Aktifkan audio browser lalu coba buat video lagi.");
     let ttsResponse;
@@ -1221,8 +1429,9 @@ $("#downloadVideo").onclick = async () => {
       ttsResponse = await requestTtsAudio(productData.narration);
     } catch (primaryError) {
       $("#videoStatus").textContent = "Narasi utama lambat atau gagal. Mencoba suara cadangan gratis Cloudflare Aura-1…";
+      setProcessProgress(74, "Mencoba suara cadangan", "Narasi utama lambat atau gagal; video masih diproses.");
       try {
-        ttsResponse = await requestTtsAudio(productData.narration, "cloudflare-aura-1");
+        ttsResponse = await requestTtsAudio(productData.narration, "cloudflare-aura-1", 45_000);
       } catch (fallbackError) {
         const reason = fallbackError.message || primaryError.message || "Layanan narasi belum tersedia.";
         throw new Error(`Narasi utama dan suara cadangan gagal. ${reason}`);
@@ -1235,6 +1444,7 @@ $("#downloadVideo").onclick = async () => {
     videoMotionDuration = audioBuffer.duration * 1000;
     setVideoStage("render");
     setVideoLoading(true, "Merender video…");
+    setProcessProgress(80, "Merender video promosi", "Menyatukan visual produk dengan narasi.");
     $("#videoStatus").textContent = "Tahap 2/3 · Merender video dengan narasi AI…";
     if (ttsProvider === "cloudflare-aura-1") {
       $("#videoStatus").textContent = "Tahap 2/3 · Memakai suara cadangan gratis Cloudflare Aura-1; video sedang dirender.";
@@ -1261,6 +1471,8 @@ $("#downloadVideo").onclick = async () => {
       setVideoStage("error");
       $("#videoStatus").textContent = "Perekaman gagal. Coba Chrome atau Edge terbaru.";
       setVideoLoading(false);
+      setProcessTask("video", "error");
+      setProcessProgress(80, "Render video gagal", "Coba ulangi proses atau gunakan Chrome terbaru.");
     };
     recorder.onstop = async () => {
       try {
@@ -1268,6 +1480,7 @@ $("#downloadVideo").onclick = async () => {
         if (!sourceVideo.size) throw new Error("File video kosong. Coba buat ulang.");
         setVideoStage("convert");
         setVideoLoading(true, "Mengonversi MP4…");
+        setProcessProgress(94, "Mengonversi video ke MP4", "Tahap akhir, file video sedang disiapkan.");
         $("#videoStatus").textContent = "Tahap 3/3 · Mengonversi video ke format MP4…";
         const form = new FormData();
         const uploadVideo = new Blob([sourceVideo], { type: "video/webm" });
@@ -1288,24 +1501,44 @@ $("#downloadVideo").onclick = async () => {
         downloadLink.href = activeVideoDownloadUrl;
         downloadLink.hidden = false;
         $("#videoDownloadActions").hidden = false;
+        const finalVideo = $("#finalVideo");
+        finalVideo.src = activeVideoDownloadUrl;
+        finalVideo.hidden = false;
+        $("#videoPlaceholder").hidden = true;
+        $("#videoResultStatus").textContent = "Video MP4 siap diputar, diunduh, dan dibagikan.";
+        const saveLink = $("#saveVideoLink");
+        saveLink.href = activeVideoDownloadUrl;
+        saveLink.hidden = false;
+        $("#continueToSave").disabled = false;
         setVideoStage("done");
         $("#videoStatus").textContent = "MP4 siap. Video tampil di layar; tekan Unduh MP4 untuk menyimpan.";
+        setProcessTask("video", "done");
+        setProcessProgress(100, "Semua hasil siap", "Video, judul, dan deskripsi produk sudah selesai.");
+        if (activeStep === 4) showScreen(5);
       } catch (error) {
         setVideoStage("error");
         $("#videoStatus").textContent = error.message || "Konversi MP4 gagal. Coba lagi.";
+        $("#videoResultStatus").textContent = error.message || "Konversi MP4 gagal. Coba proses ulang.";
+        setProcessTask("video", "error");
+        setProcessProgress(88, "Video belum selesai", "Judul dan deskripsi tetap tersedia. Coba ulangi video.");
       } finally {
         canvasStream?.getTracks().forEach((track) => track.stop());
         audioStream?.getTracks().forEach((track) => track.stop());
         await audioContext?.close().catch(() => {});
         drawVideo();
         setVideoLoading(false);
-        if (activeStep === 3) startVideoPreview();
+        if (activeStep === 5) startVideoPreview();
       }
     };
 
     const animate = (now) => {
       const progress = Math.min((now - startedAt) / (audioBuffer.duration * 1000), 1);
       drawVideo(progress, now);
+      const bucket = Math.floor(progress * 4);
+      if (bucket !== lastProgressBucket) {
+        lastProgressBucket = bucket;
+        setProcessProgress(80 + Math.round(progress * 11), "Merender video promosi", `Progres render ${Math.round(progress * 100)}%.`);
+      }
       if (progress < 1) animationFrame = requestAnimationFrame(animate);
     };
     recorder.start(500);
@@ -1320,17 +1553,22 @@ $("#downloadVideo").onclick = async () => {
     setVideoStage("error");
     $("#videoStatus").textContent = error.message || "Tidak dapat membuat video bersuara.";
     setVideoLoading(false);
-    if (activeStep === 3) startVideoPreview();
+    setProcessTask("video", "error");
+    setProcessProgress(72, "Video belum berhasil dibuat", "Coba ulangi tahap video. Konten CEO tetap tersimpan.");
+    $("#videoResultStatus").textContent = error.message || "Tidak dapat membuat video bersuara.";
+    if (activeStep === 5) startVideoPreview();
   }
 };
 
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.onclick = async () => {
     const text = $("#" + button.dataset.copy).textContent;
+    const originalLabel = button.dataset.originalLabel || button.textContent;
+    button.dataset.originalLabel = originalLabel;
     try {
       await navigator.clipboard.writeText(text);
       button.textContent = "Tersalin";
-      setTimeout(() => { button.textContent = "Salin"; }, 1200);
+      setTimeout(() => { button.textContent = originalLabel; }, 1200);
     } catch { alert(text); }
   };
 });
