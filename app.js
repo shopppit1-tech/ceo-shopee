@@ -861,7 +861,7 @@ $("#photo").onchange = (event) => {
     $("#photoPreview").hidden = false;
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
-    $("#status").textContent = "Foto diterima. Ketik nama produk sekali, lalu tekan Buat Foto dengan AI.";
+    $("#status").textContent = "Foto diterima. Isi nama produk, lalu klik Buat Semua Otomatis.";
     $("#videoStatus").textContent = "Setelah CEO selesai, video Shorts dibuat otomatis dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
