@@ -799,8 +799,13 @@ $("#photo").onchange = (event) => {
     event.target.value = "";
     return;
   }
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-    alert("Gunakan JPG, PNG, atau WEBP.");
+  const mime = String(file.type || "").toLowerCase();
+  const extension = String(file.name || "").toLowerCase().split(".").pop();
+  const allowedExtension = ["jpg", "jpeg", "png", "webp"].includes(extension);
+  const allowedMime = ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(mime);
+  const unknownButImage = !mime && allowedExtension;
+  if (!allowedMime && !unknownButImage && !(mime.startsWith("image/") && allowedExtension)) {
+    $("#uploadError").textContent = "Gunakan foto JPG, JPEG, PNG, atau WEBP dari galeri.";
     event.target.value = "";
     return;
   }
