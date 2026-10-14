@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6427ed">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CEO Shopee">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="Buat foto produk AI, banner, SEO, dan video Shorts bersuara dalam tiga langkah sederhana.">
+  <title>CEO Shopee</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/ceo-shopee-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./icons/ceo-shopee-192.png">
+  <style>
+    :root{--primary:#5b3cc4;--primary-dark:#4526a8;--mint:#08a879;--ink:#1e1b31;--muted:#6b6879;--line:#e9e6f2;--surface:#fff;--bg:#f6f5fa}
+    *{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);min-height:100vh}
+    button,input,textarea,select{font:inherit}button{touch-action:manipulation}
+    header{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;position:sticky;top:0;z-index:5}
+    .headBar{max-width:760px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:850;color:var(--ink)}.brandMark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#805bf0,#5233b9);display:grid;place-items:center;color:white;font-weight:900;font-size:20px;box-shadow:0 5px 12px #5b3cc433}.brand small{display:block;color:var(--muted);font-weight:550;font-size:11px;margin-top:1px}.installControls{display:flex;align-items:center;gap:8px}.installHint{font-size:11px;color:var(--muted);max-width:220px}
+    .app{max-width:760px;margin:0 auto;padding:14px 14px calc(30px + env(safe-area-inset-bottom))}.stepper{display:grid;grid-template-columns:repeat(3,1fr);list-style:none;margin:6px 0 16px;padding:0;position:relative}.stepper:before{content:"";height:2px;background:#e2deed;position:absolute;top:15px;left:17%;right:17%}.stepper li{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;color:#928da0;font-size:11px;font-weight:700}.stepNum{height:30px;width:30px;display:grid;place-items:center;border-radius:50%;background:#ebe8f3;color:#777186;border:2px solid var(--bg)}.stepper li.active{color:var(--primary)}.stepper li.active .stepNum,.stepper li.done .stepNum{background:var(--primary);color:#fff}.screen{animation:fadein .18s ease-out}.screen[hidden]{display:none}@keyframes fadein{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .screenTitle{margin:14px 2px 5px;font-size:24px;letter-spacing:-.5px}.screenIntro{margin:0 2px 16px;color:var(--muted);font-size:14px;line-height:1.5}.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 5px 18px #1b123208}.upload{border:2px dashed #c9c1e2;border-radius:17px;background:#fbfaff;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;text-align:center;cursor:pointer;color:var(--primary);transition:.15s}.upload:active{transform:scale(.99);background:#f4f0ff}.upload img{max-width:100%;max-height:240px;border-radius:12px;object-fit:contain}.uploadTitle{font-weight:800;font-size:16px}.uploadHint{font-size:12px;color:var(--muted)}input[type=file]{display:none}.btn{border:0;border-radius:12px;padding:12px 15px;min-height:46px;font-weight:750;cursor:pointer}.btn:disabled{opacity:.48;cursor:not-allowed}.primary{background:var(--primary);color:#fff}.primary:active{background:var(--primary-dark)}.outline{background:#fff;border:1px solid #d7d1e8;color:var(--primary)}.full{width:100%}.smallBtn{padding:9px 12px;min-height:40px;font-size:13px}.note{margin:12px 2px 0;color:var(--muted);font-size:12px;line-height:1.45}.error{color:#a32727}.status{min-height:20px;margin:10px 0;color:var(--muted);font-size:13px;line-height:1.5}.status:empty{display:none}.optional{margin-top:12px;border:1px solid var(--line);border-radius:13px;background:white;padding:0 12px}.optional summary{cursor:pointer;padding:12px 0;font-size:13px;font-weight:700;color:var(--primary)}.field label{font-weight:700;font-size:13px}.field textarea,.field select{width:100%;padding:11px;border:1px solid #dcd7e8;border-radius:10px;font:inherit;margin-top:7px}.field textarea{min-height:74px;resize:vertical}
+    .aiPhotoGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.aiPhotoCard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;min-width:0}.aiPhotoCard.selected{border:2px solid var(--primary);box-shadow:0 0 0 3px #5b3cc41a}.aiPhotoCard img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#f1eff6}.aiPhotoCard strong{display:block;font-size:13px;padding:9px 9px 0}.aiPhotoCard small{display:block;color:var(--muted);font-size:11px;padding:4px 9px 0;min-height:31px}.photoActions{display:grid;gap:6px;padding:9px}.photoActions .btn{font-size:12px;padding:9px 5px;min-height:39px}.aiPhotoPlaceholder{aspect-ratio:1/1;display:grid;place-items:center;text-align:center;padding:12px;background:#f8f7fb;color:var(--muted);font-size:12px;line-height:1.45;white-space:pre-line}
+    .screenActions{display:flex;gap:8px;margin-top:14px}.screenActions .btn{flex:1}.resultTop{display:flex;align-items:center;gap:12px}.resultTop img{width:64px;height:64px;object-fit:cover;border-radius:13px;background:#f1eff6}.resultTop strong{display:block;font-size:14px}.resultTop small{display:block;color:var(--muted);margin-top:3px;font-size:12px}.bannerGrid{display:grid;grid-template-columns:minmax(0,1fr);max-width:600px;margin:10px auto}.bannerCard{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}.bannerCard canvas{width:100%;display:block}.bannerMeta{padding:10px}.bannerMeta strong{display:block;font-size:13px;margin-bottom:8px}.bannerMeta button{width:100%;font-size:13px}.styleOptions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.style{padding:9px 4px;background:#fff;border:1px solid var(--line);border-radius:9px;font-size:12px;cursor:pointer}.style.active{border:2px solid var(--primary);background:#f5f1ff;color:var(--primary);font-weight:800}.seoGrid{display:grid;gap:9px}.seoField{border:1px solid var(--line);background:#fbfaff;border-radius:12px;padding:11px}.seoHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.seoHead strong{font-size:13px}.copy{background:#f3efff;color:var(--primary);border:1px solid #ded6f7;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px}.seoText{font-size:13px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}.videoBox{display:flex;justify-content:center;background:#211532;border-radius:14px;overflow:hidden;padding:8px}.videoBox canvas{height:min(65vh,620px);width:auto;max-width:100%;display:block;aspect-ratio:9/16;object-fit:contain;border-radius:9px}.videoHelp{color:var(--muted);line-height:1.45;font-size:13px;margin:0 0 11px}.foot{max-width:760px;margin:auto;padding:8px 16px 24px;text-align:center;color:#898496;font-size:11px}
+    .app{padding-bottom:calc(104px + env(safe-area-inset-bottom))}.bottomTabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px #20143b0d}.bottomTabsInner{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bottomTab{min-height:48px;border:1px solid transparent;border-radius:12px;background:#fff;color:var(--muted);font-weight:750;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.bottomTab.active{color:var(--primary);background:#f2efff;border-color:#e4defa}.bottomTab:disabled{opacity:.38;cursor:not-allowed}.bottomTab .tabStep{font-size:10px;letter-spacing:.02em}
+    .settingsDialog{border:0;border-radius:20px;padding:0;width:min(480px,calc(100% - 24px));max-height:82dvh;color:var(--ink);box-shadow:0 20px 80px #130d2a55}.settingsDialog::backdrop{background:#17102680;backdrop-filter:blur(4px)}.settingsBody{padding:18px}.settingsHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.settingsHead h2{font-size:20px;margin:0}.settingsRow{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line);font-size:13px}.settingsNote{font-size:12px;color:var(--muted);line-height:1.55}.settingsStatus{min-height:20px;font-size:12px;color:var(--muted);line-height:1.5}.settingsActions{display:flex;gap:8px;align-items:center}.brand>div:last-child{white-space:nowrap}#openSettings{font-size:11px;padding:8px 8px;min-height:38px;white-space:nowrap}#installPwa{font-size:11px;padding:8px 9px;min-height:38px;white-space:nowrap}
+    @media(min-width:640px){.app{padding:20px 20px 120px}.panel{padding:20px}.screenTitle{font-size:28px}.aiPhotoGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.aiPhotoCard strong{font-size:15px}.seoGrid{grid-template-columns:1fr 1fr}}
+    @media(max-width:360px){header{padding:8px 10px}.headBar{gap:5px}.brand{gap:7px}.brand small{display:none}.installControls{gap:5px}.app{padding-left:10px;padding-right:10px}.panel{padding:12px}.screenTitle{font-size:22px}.stepper li{font-size:10px}.installHint{max-width:130px}.smallBtn{padding:8px 7px;min-height:38px}#openSettings{font-size:10px;padding:8px 6px}#installPwa{font-size:10px;padding:8px 7px}.aiPhotoGrid{gap:7px}}
+
+    /* Refresh visual mengikuti referensi Foto & SEO Shopee. */
+    :root{--primary:#6828f2;--primary-dark:#4e19c6;--mint:#0caf73;--ink:#201b36;--muted:#777286;--line:#e9e2fb;--surface:#fff;--bg:#f7f5fc}
+    html{background:var(--bg)}body{background:radial-gradient(ellipse at 50% -12%,#eee6ff 0,transparent 44%),var(--bg);color:var(--ink)}
+    header{background:rgba(255,255,255,.96);border-bottom-color:#eee9f8;box-shadow:0 4px 18px #33215d0a;backdrop-filter:blur(14px)}
+    .headBar{max-width:820px}.brand{gap:11px;font-size:15px;letter-spacing:-.25px}.brand small{font-size:11px;color:#777286}
+    .brandMark{width:42px;height:42px;border-radius:14px;background:linear-gradient(140deg,#c218ff 0%,#7227f5 58%,#4524e9 100%);box-shadow:0 7px 18px #6b2af344}
+    .brandMark svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .app{max-width:820px}.stepper{gap:8px;margin:8px 0 18px}.stepper:before{display:none}.stepper li{flex-direction:row;gap:7px;min-width:0;justify-content:center;padding:8px 7px;border:1px solid #ece6f8;border-radius:13px;background:#fff;box-shadow:0 4px 12px #2e1b4d08;font-size:11px;color:#726b80}.stepNum{width:25px;height:25px;flex:0 0 25px;background:#f1edfa;color:#736b82;border:0;font-size:12px}.stepper li.active{background:linear-gradient(115deg,#782df2,#5424e8);border-color:transparent;color:#fff;box-shadow:0 7px 16px #642be533}.stepper li.active .stepNum{background:#fff;color:#6127e8}.stepper li.done{background:#f3edff;border-color:#e6dcff;color:#5923d4}.stepper li.done .stepNum{background:#6828f2;color:#fff}
+    .screenTitle{font-size:25px;letter-spacing:-.65px;line-height:1.15;margin-top:18px}.screenIntro{font-size:14px;line-height:1.55;color:#6d6879;margin-bottom:14px}.heroFeatures{display:flex;flex-wrap:wrap;gap:7px;margin:0 2px 15px}.heroFeatures span{background:#f0eaff;border:1px solid #e4d8ff;color:#5925d6;border-radius:99px;padding:7px 10px;font-size:11px;font-weight:800;box-shadow:0 3px 9px #5c2c9909}
+    .panel{border:1px solid #eee9f8;border-radius:20px;padding:17px;box-shadow:0 10px 30px #2c1c4e0a}.upload{min-height:226px;border:2px dashed #cbb9fa;border-radius:19px;background:linear-gradient(145deg,#fbf9ff,#f3eeff);gap:11px}.upload:active{background:#f0eaff}.uploadTitle{font-size:16px;color:#30224f}.uploadHint{color:#777286}.btn{border-radius:13px;min-height:47px;transition:transform .15s,box-shadow .15s,filter .15s}.btn:active{transform:translateY(1px) scale(.99)}.primary{background:linear-gradient(115deg,#7d2df4,#5826e8);box-shadow:0 7px 16px #6326e82b}.primary:active{background:linear-gradient(115deg,#6922df,#4817c4)}.outline{background:#fff;border:1px solid #ddd2f7;color:#5c25d5}.outline:active{background:#f6f1ff}
+    #installPwa{background:linear-gradient(110deg,#11b97b,#079562);color:#fff;border:0;box-shadow:0 5px 13px #078f6224}.status{font-size:13px}.optional{border-color:#ece6f8}.optional summary{color:#6127df}
+    .aiPhotoGrid{gap:12px}.aiPhotoCard{border-color:#eee9f7;border-radius:17px;box-shadow:0 5px 16px #2c1c4e0a}.aiPhotoCard.selected{border-color:#7a3bf3;box-shadow:0 0 0 3px #702df21a,0 8px 20px #49239516}.aiPhotoCard img{background:#f4f0fa}.aiPhotoCard strong{font-size:13px;color:#30244c}.aiPhotoPlaceholder{background:linear-gradient(145deg,#fbf9ff,#f0ebf9);color:#655b78}.photoActions .btn{box-shadow:none}.resultTop img{border-radius:15px}
+    .seoField{background:#fbfaff;border-color:#ece6f7;border-radius:14px}.seoHead strong{color:#30244c}.copy{background:#f0eaff;color:#5e25d8;border-color:#e1d5fb}.bannerCard{border-color:#ece6f7;border-radius:16px;box-shadow:0 7px 20px #2c1c4e0d}.style{border-color:#ece6f7}.style.active{border-color:#8a55f5;background:#f4eeff;color:#5b23d2}.videoBox{background:linear-gradient(145deg,#251239,#30124d);border-radius:17px}
+    .bottomTabs{background:rgba(255,255,255,.97);border-top-color:#ece7f5;box-shadow:0 -8px 24px #26184412;backdrop-filter:blur(14px)}.bottomTabsInner{max-width:820px}.bottomTab{border-radius:13px;color:#777286}.bottomTab.active{color:#6022e4;background:#f1eaff;border-color:#e6dcff}.bottomTab .tabStep{width:19px;height:19px;display:grid;place-items:center;border-radius:7px;background:#f1eef6;color:#746d80;font-size:10px}.bottomTab.active .tabStep{background:linear-gradient(130deg,#792df3,#5425e8);color:#fff}
+    .settingsDialog{border:1px solid #eee7f8}.settingsDialog::backdrop{background:#1b103580}.settingsHead h2{letter-spacing:-.4px}.foot{color:#888397}
+    @media(min-width:640px){.heroFeatures{margin-bottom:18px}.panel{padding:20px}.screenTitle{font-size:29px}.stepper li{padding:9px 12px;font-size:12px}.brand{font-size:16px}}
+    @media(max-width:440px){.brand{font-size:14px;gap:8px}.installControls{gap:5px}#openSettings{font-size:10px;padding:8px 7px}#installPwa{font-size:10px;padding:8px 7px}}
+    @media(max-width:380px){.brand{font-size:13px;gap:8px}.brandMark{width:37px;height:37px;border-radius:12px}.brandMark svg{width:23px;height:23px}.stepper{gap:5px}.stepper li{padding:7px 4px;gap:5px;font-size:10px}.stepNum{width:22px;height:22px;flex-basis:22px;font-size:11px}.heroFeatures{gap:5px}.heroFeatures span{padding:6px 8px;font-size:10px}}
+    #downloadVideo{display:flex;align-items:center;justify-content:center;gap:9px}#downloadVideo[aria-busy="true"]{cursor:progress;filter:brightness(.94)}.videoSpinner{width:18px;height:18px;flex:0 0 18px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;animation:video-spin .75s linear infinite}.videoSpinner[hidden]{display:none}@keyframes video-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.videoSpinner{animation-duration:1.5s}}#videoDownloadActions[hidden]{display:none}.videoDownloadLink{display:flex;align-items:center;justify-content:center;text-decoration:none}
+
+    /* Tema dan hierarki mengikuti contoh pengguna: ungu, hijau, langkah ringkas, serta panel lembut. */
+    :root{--primary:#5b21f5;--primary-dark:#4618cc;--mint:#08b86a;--ink:#191638;--muted:#74718e;--line:#e8e3fa;--bg:#fbfaff}
+    html{background:#f7f5ff}body{background:linear-gradient(180deg,#f7f5ff 0,#fff 54%,#f2fff8 100%);color:var(--ink)}
+    header{background:rgba(255,255,255,.94);border-color:#eee9fb;backdrop-filter:blur(14px)}
+    .headBar,.app,.bottomTabsInner{max-width:900px}.app{padding-top:18px}
+    .stepper{gap:9px;margin:17px 0}.stepper:before{display:none}.stepper li{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:9px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 5px 18px #3612780b;color:var(--ink);font-size:12px}
+    .stepNum{width:32px;height:32px;flex:0 0 32px;background:var(--primary);color:#fff;border:0}.stepper li.active{background:linear-gradient(112deg,#7922f8,#4c1ce7);border-color:transparent;color:#fff;box-shadow:0 7px 16px #6121e52a}.stepper li.active .stepNum{background:#fff;color:var(--primary)}.stepper li.done{background:#f1ebff;border-color:#e5dcfa;color:#4d22bd}.stepper li.done .stepNum{background:var(--primary);color:#fff}
+    .stepLabel{display:block;text-align:left;font-size:12px;font-weight:800;line-height:1.25}.stepLabel small{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:550}.stepper li.active .stepLabel small{color:#ece5ff}
+    .heroEyebrow{display:table;margin:23px auto 0;padding:7px 12px;border-radius:99px;background:#eee8ff;color:var(--primary);font-size:11px;font-weight:850;letter-spacing:.15px}
+    .screenTitle{text-align:center;font-size:clamp(27px,5vw,40px);line-height:1.12;letter-spacing:-1px;margin:13px 0 8px}.screenTitle span{color:var(--primary)}.screenIntro{max-width:550px;margin:0 auto 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+    .heroFeatures{justify-content:center}.heroFeatures span{background:#eee8ff;border-color:#e4d8ff;color:#5620dd}.panel{border-radius:22px;border-color:var(--line);box-shadow:0 15px 40px #3612780b}.upload{min-height:250px;background:linear-gradient(145deg,#faf8ff,#f4efff);border-color:#d8cdfa;border-radius:18px}.upload.dragover{border-color:var(--primary);background:#f1ebff;box-shadow:0 0 0 4px #5b21f51a;transform:scale(1.005)}
+    .btn{border-radius:12px}.primary{background:linear-gradient(110deg,#7922f8,#4c1ce7);box-shadow:0 7px 16px #6121e52a}.outline{border-color:#d9cdfa;color:#5620dd}.style.active,.copy{color:#5620dd}.aiPhotoGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.aiPhotoCard{border-radius:14px}.aiPhotoCard img{aspect-ratio:1/1;object-fit:cover}.videoBox{background:linear-gradient(135deg,#32125f,#7135ed 60%,#08b86a);border-radius:15px}
+    #downloadVideo,#generate,#retryAiEdits{background:linear-gradient(110deg,#6822f4,#04bd70);box-shadow:0 7px 16px #6121e52a;color:#fff;border:0}.videoDownloadLink{background:#fff;color:var(--primary);border-color:#d9cdfa}
+    .optional{border-color:var(--line);border-radius:13px}.optional summary{color:var(--primary)}.status{color:var(--muted)}
+    .brand{flex:1;min-width:0}.brand>div:last-child{white-space:normal;min-width:0}.brand small{line-height:1.2}.installControls{position:relative;flex-shrink:0}.installHint{position:absolute;right:0;top:calc(100% + 6px);z-index:8;max-width:min(280px,calc(100vw - 24px));padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 8px 22px #21163e18;white-space:normal}
+    #editStatus.isLoading{position:relative;min-height:54px;padding:11px 12px 19px 42px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#4c3b76}#editStatus.isLoading::before{content:"";position:absolute;left:13px;top:13px;width:18px;height:18px;border:3px solid #eee8ff;border-top-color:var(--primary);border-right-color:var(--mint);border-radius:50%;animation:video-spin .85s linear infinite}#editStatus.isLoading::after{content:"";position:absolute;left:0;bottom:0;width:var(--progress,0%);height:4px;background:linear-gradient(90deg,var(--primary),var(--mint));transition:width .25s ease}
+    @media(max-width:480px){.stepper{gap:5px}.stepper li{padding:8px 6px;gap:6px}.stepNum{width:26px;height:26px;flex-basis:26px;font-size:11px}.stepLabel{font-size:10px}.stepLabel small{font-size:9px}.aiPhotoGrid{gap:6px}.aiPhotoCard strong{padding:7px 6px 0;font-size:11px}.aiPhotoCard small{padding:4px 6px 0;font-size:9px;min-height:34px}.photoActions{padding:6px;gap:5px}.photoActions .btn{font-size:10px;padding:7px 3px;min-height:36px}}
+    @media(max-width:360px){.stepLabel small{display:none}.aiPhotoGrid{grid-template-columns:1fr}.aiPhotoCard{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center}.aiPhotoCard img{grid-row:1/4;aspect-ratio:1/1;height:110px}.aiPhotoCard strong,.aiPhotoCard small,.aiPhotoCard .photoActions{grid-column:2}.aiPhotoCard .photoActions{padding-top:5px}}
+    #openSettings{display:none}.app{padding-bottom:calc(145px + env(safe-area-inset-bottom))}.bottomTabs{left:12px;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;max-width:900px;margin:0 auto;padding:7px 8px;border:1px solid #e7e3eb;border-radius:23px;background:rgba(255,255,255,.97);box-shadow:0 8px 28px #24143b1a}.bottomTabsInner{width:100%;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}.bottomTab,.bottomTab.active{min-height:72px;border:0;border-radius:16px;background:transparent;color:#191638;font-size:12px;font-weight:650;gap:4px}.bottomTab .menuIcon{display:block;width:27px;height:27px;fill:none;stroke:#6929d5;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}.bottomTab.active .menuIcon{stroke:#5b21f5}.bottomTab .tabStep{display:none}.bottomTab:focus-visible{outline:2px solid #7d4ced;outline-offset:-2px}
+    .collectionPanel{padding:16px}.localDataNote{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.5}.collectionList{display:grid;gap:9px}.historyItem{display:flex;align-items:center;gap:11px;padding:9px;border:1px solid var(--line);border-radius:14px;background:#fff;min-width:0}.historyItem img{width:54px;height:54px;flex:0 0 54px;border-radius:11px;object-fit:cover;background:#f3effa}.historyDetail{display:grid;gap:5px;flex:1;min-width:0}.historyDetail strong,.savedCard strong{font-size:13px;line-height:1.35;overflow-wrap:anywhere}.historyDetail small,.savedCard small{font-size:11px;color:var(--muted);line-height:1.4}.historyItem .btn{min-height:37px;padding:8px 12px}.savedGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.savedCard{display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:15px;background:#fff}.savedCard>img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:11px;background:#f3effa}.savedActions{display:flex;gap:6px;margin-top:auto}.savedActions .btn{flex:1;min-height:37px;padding:7px 5px;font-size:11px}.emptyState{padding:22px 12px;border:1px dashed #dcd3ef;border-radius:14px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5;background:#fcfbff}.emptyState[hidden]{display:none}
+    @media(max-width:360px){.bottomTabs{left:8px;right:8px;padding:6px 3px;border-radius:19px}.bottomTab,.bottomTab.active{min-height:65px;font-size:11px}.bottomTab .menuIcon{width:24px;height:24px}.savedGrid{gap:7px}.savedCard{padding:7px}.savedActions .btn{font-size:10px}}
+    #status.isLoading,#videoStatus.isLoading{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #e8e3fa;border-radius:13px;background:#fff;color:#4c3b76}#status.isLoading::before,#videoStatus.isLoading::before{content:"";display:block;width:19px;height:19px;flex:0 0 19px;border:3px solid #eee8ff;border-top-color:var(--primary);border-right-color:var(--mint);border-radius:50%;animation:video-spin .85s linear infinite;margin-top:1px}@media(prefers-reduced-motion:reduce){#status.isLoading::before,#videoStatus.isLoading::before{animation-duration:1.5s}}
+
+  
+    /* Layout homepage baru; palet warna asli dipertahankan. */
+    .homeDashboard .homeHero{display:grid;grid-template-columns:minmax(0,1fr) 112px;align-items:center;gap:6px;margin:12px 0 18px;padding:19px 16px;border:1px solid #e4d8ff;border-radius:24px;background:linear-gradient(135deg,#f0eaff 0%,#fbf9ff 70%,#e9fff5 100%);overflow:hidden}
+    .homeHeroCopy{min-width:0;position:relative;z-index:1}
+    .homeDashboard .homeHero .heroEyebrow{margin:0 0 12px;padding:6px 9px;font-size:9px;letter-spacing:.5px;background:#fff;border:1px solid #e4d8ff}
+    .homeDashboard .homeHero .screenTitle{text-align:left;font-size:clamp(25px,6vw,34px);line-height:1.08;letter-spacing:-1px;margin:0 0 10px}
+    .homeDashboard .homeHero .screenTitle span{display:block;color:var(--primary)}
+    .homeDashboard .homeHero .screenIntro{text-align:left;margin:0;font-size:12px;line-height:1.55;max-width:350px}
+    .heroVisual{height:125px;position:relative;display:grid;place-items:center}
+    .heroVisualGlow{position:absolute;width:94px;height:94px;border-radius:29px;background:linear-gradient(145deg,#d9c8ff,#b8f1d8);transform:rotate(13deg)}
+    .visualSheet{position:absolute;width:64px;height:83px;border-radius:14px;box-shadow:0 12px 22px #2c174222;display:flex;align-items:center;justify-content:center}
+    .visualSheetBack{right:1px;top:13px;background:linear-gradient(145deg,#a57bff,#6828f2);color:white;font-size:25px;transform:rotate(12deg)}
+    .visualSheetFront{left:5px;top:25px;background:#fff;border:1px solid #fff;transform:rotate(-8deg);flex-direction:column;gap:7px}
+    .visualSheetFront span{width:39px;height:39px;display:grid;place-items:center;border-radius:11px;background:#eee7ff;color:#6828f2;font-size:25px}
+    .visualSheetFront i{align-self:flex-end;margin-right:9px;color:#08b86a;font-style:normal;font-size:16px}
+    .homeFeatureGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:24px}
+    .homeFeature{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:12px 10px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 5px 16px #2b174d08}
+    .homeFeatureIcon{width:32px;height:32px;display:grid;place-items:center;margin-bottom:3px;border-radius:11px;background:#eee8ff;color:var(--primary);font-size:21px;font-weight:800}
+    .homeFeature:nth-child(2) .homeFeatureIcon{background:#e4f8ef;color:#07875b}
+    .homeFeature:nth-child(3) .homeFeatureIcon{background:#fff1dc;color:#b86b12}
+    .homeFeature strong{font-size:11px;line-height:1.25;color:var(--ink)}
+    .homeFeature small{font-size:9px;line-height:1.35;color:var(--muted)}
+    .homeSectionHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:0 2px 12px}
+    .homeSectionHeading small{font-size:9px;letter-spacing:1px;font-weight:850;color:var(--primary)}
+    .homeSectionHeading h2{font-size:21px;line-height:1.2;letter-spacing:-.5px;margin:4px 0 0}
+    .homeStepPill{white-space:nowrap;padding:7px 9px;border:1px solid #e4d8ff;border-radius:99px;background:#f0eaff;color:var(--primary);font-size:9px;font-weight:850}
+    .homeCreatePanel{padding:16px;border-radius:22px}
+    .homePanelTitle{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+    .homeStepNumber{width:39px;height:39px;flex:0 0 39px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#792cf3,#5420df);color:#fff;font-size:13px;font-weight:850;box-shadow:0 6px 13px #6828f22b}
+    .homePanelTitle strong,.homeUploadHeading strong{display:block;font-size:14px;color:var(--ink)}
+    .homePanelTitle small,.homeUploadHeading small{display:block;margin-top:3px;font-size:11px;line-height:1.45;color:var(--muted)}
+    .homeProductDetails{margin:0 0 18px;padding:0 12px;border:1px solid var(--line);border-radius:15px;background:#fcfbff}
+    .homeProductDetails summary{display:flex;align-items:center;gap:10px;padding:12px 0;list-style:none}
+    .homeProductDetails summary::-webkit-details-marker{display:none}
+    .homeDetailIcon{width:33px;height:33px;flex:0 0 33px;display:grid;place-items:center;border-radius:10px;background:#eee7ff;color:var(--primary);font-size:18px}
+    .homeDetailLabel{flex:1;min-width:0}
+    .homeDetailLabel strong{display:block;font-size:12px;color:var(--ink)}
+    .homeDetailLabel small{display:block;margin-top:3px;font-size:10px;color:var(--muted);font-weight:500}
+    .homeDetailArrow{font-size:20px;color:var(--primary);transition:transform .2s}
+    .homeProductDetails[open] .homeDetailArrow{transform:rotate(180deg)}
+    .homeProductDetails .field{padding-bottom:13px}
+    .homeProductDetails .field label{font-size:11px}
+    .homeProductDetails .field textarea{min-height:82px;margin-top:6px;padding:12px;border-radius:11px;font-size:12px;line-height:1.5;background:#fff}
+    .homeUploadHeading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .homeUploadHeading>span{padding:6px 7px;border-radius:7px;background:#f5f2fa;color:var(--muted);font-size:9px;white-space:nowrap}
+    .homeDashboard .upload{min-height:222px;padding:18px 12px;gap:8px;border:1.5px dashed #c8b5f6;border-radius:17px;background:linear-gradient(150deg,#fbf9ff,#f5f0ff)}
+    .homeUploadGraphic{width:64px;height:64px;position:relative;display:grid;place-items:center;border-radius:20px;background:#ebe2ff;color:var(--primary);margin-bottom:3px}
+    .homeUploadGraphic>span{font-size:36px;line-height:1}
+    .homeUploadGraphic i{position:absolute;right:-4px;bottom:-4px;width:25px;height:25px;display:grid;place-items:center;border:3px solid #fbf9ff;border-radius:50%;background:#08b86a;color:#fff;font-size:17px;font-style:normal;font-weight:800}
+    .homeDashboard .uploadTitle{font-size:13px;color:var(--ink)}
+    .homeDashboard .uploadHint{font-size:10px;color:var(--muted)}
+    .homeChoosePhoto{display:inline-flex;align-items:center;justify-content:center;min-height:40px;margin-top:4px;padding:9px 18px;font-size:12px}
+    .homePrivacyNote{display:flex;align-items:flex-start;gap:7px;margin:13px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}
+    .homePrivacyNote span{width:16px;height:16px;flex:0 0 16px;display:grid;place-items:center;border-radius:50%;background:#e4f8ef;color:#07875b;font-size:10px;font-weight:900}
+    @media(min-width:640px){.homeDashboard .homeHero{grid-template-columns:minmax(0,1fr) 160px;padding:26px 28px}.heroVisual{transform:scale(1.1)}.homeFeatureGrid{gap:13px;margin-bottom:28px}.homeFeature{padding:16px;border-radius:19px}.homeFeature strong{font-size:13px}.homeFeature small{font-size:11px}.homeCreatePanel{padding:22px}}
+    @media(max-width:390px){.homeDashboard .homeHero{grid-template-columns:minmax(0,1fr) 82px;padding:15px 12px;gap:3px}.heroVisual{transform:scale(.77);transform-origin:center right;margin-left:-15px}.homeDashboard .homeHero .screenTitle{font-size:24px}.homeDashboard .homeHero .screenIntro{font-size:11px}.homeFeatureGrid{gap:6px}.homeFeature{padding:10px 7px}.homeFeature strong{font-size:10px}.homeFeature small{font-size:8px}.homeSectionHeading h2{font-size:19px}.homeStepPill{font-size:8px;padding:6px 7px}}
+
+
+    /* Login dan profil pengguna: gaya diselaraskan dengan mockup CEO Shopee. */
+    body.auth-locked{overflow:hidden}
+    body.auth-locked>header,body.auth-locked>.app,body.auth-locked>.bottomTabs,body.auth-locked>.foot{visibility:hidden}
+    .authScreen{position:fixed;inset:0;z-index:1000;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:calc(20px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(155deg,#6424ef 0%,#8558ff 38%,#f3efff 38.2%,#fbfaff 100%);color:#191638}
+    .authScreen[hidden]{display:none}
+    .authBrand{width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#fff;padding:28px 8px 28px}
+    .authLogo{width:104px;height:104px;border-radius:30px;display:grid;place-items:center;background:linear-gradient(145deg,#a93cff,#5522ec);border:5px solid #ffffffb8;box-shadow:0 12px 28px #35108035;margin-bottom:17px}
+    .authLogo svg{width:60px;height:60px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .authBrand h1{font-size:29px;letter-spacing:-.7px;margin:0;font-weight:850}.authBrand p{font-size:15px;margin:7px 0 0;color:#f2eaff}
+    .authCard{width:100%;max-width:430px;border:1px solid #eee8fb;border-radius:24px;background:#fff;padding:23px 19px;box-shadow:0 16px 40px #30115d19}
+    .authCard h2{font-size:22px;letter-spacing:-.4px;margin:0 0 7px}.authIntro{font-size:13px;line-height:1.5;color:#777286;margin:0 0 20px}
+    .authField{display:flex;align-items:center;gap:11px;border:1px solid #ded9ed;border-radius:13px;padding:0 13px;min-height:56px;margin:11px 0;background:#fff;color:#77718c}
+    .authField svg{width:21px;height:21px;flex:0 0 21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .authField input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#191638;font-size:14px;padding:14px 0}
+    .authSubmit{width:100%;margin-top:7px;min-height:53px;border:0;border-radius:13px;color:#fff;background:linear-gradient(110deg,#792cf3,#5220e8);font-size:15px;font-weight:800;box-shadow:0 7px 17px #6121e52b}
+    .authDivider{display:flex;align-items:center;gap:12px;color:#888299;font-size:12px;margin:18px 0}.authDivider:before,.authDivider:after{content:"";height:1px;flex:1;background:#e9e4f4}
+    .authGoogle{width:100%;min-height:49px;border:1px solid #ddd6ee;border-radius:12px;background:#fff;color:#39324e;font-weight:750}
+    .authSwitch{text-align:center;margin:19px 0 0;color:#777286;font-size:12px}.authSwitch button{border:0;background:transparent;color:#6024e8;font-weight:850;padding:4px}
+    .authMsg{min-height:18px;margin:10px 0 0;color:#b42318;font-size:12px;line-height:1.4}.authFine{max-width:430px;margin:15px 4px 0;color:#f5edff;text-align:center;font-size:10px;line-height:1.5}
+    .profileHero{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(135deg,#f5efff,#fff)}
+    .profileAvatar{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:50%;background:#eee7ff;color:#6727ef;font-size:25px;font-weight:850}
+    .profileHeroText{flex:1;min-width:0}.profileHeroText strong{display:block;font-size:16px;overflow-wrap:anywhere}.profileHeroText small{display:block;margin-top:4px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+    .settingsSectionTitle{margin:21px 2px 10px;font-size:15px;font-weight:850;color:var(--ink)}
+    .settingsMenu{border:1px solid var(--line);border-radius:17px;background:#fff;padding:0 13px}
+    .settingsMenuRow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 0;border:0;border-bottom:1px solid #eeeaf7;background:transparent;text-align:left;color:var(--ink)}
+    .settingsMenuRow:last-child{border-bottom:0}.settingsMenuIcon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:50%;background:#f0eaff;color:#6727ef;font-size:20px}
+    .settingsMenuText{flex:1;min-width:0}.settingsMenuText strong{display:block;font-size:13px}.settingsMenuText small{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.4}.settingsChevron{font-size:23px;color:#77718e}
+    .settingsDialog{max-height:94dvh;overflow:auto}
+    @media(max-width:480px){.authScreen{padding-left:17px;padding-right:17px}.authBrand{padding-top:25px;padding-bottom:24px}.authLogo{width:88px;height:88px;border-radius:26px}.authLogo svg{width:51px;height:51px}.authBrand h1{font-size:26px}.authCard{padding:21px 17px}.settingsDialog{width:100%;max-width:none;max-height:100dvh;height:100dvh;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.settingsBody{padding:20px 17px 30px}}
+
+  </style>
+</head>
+<body class="auth-locked">
+  <section class="authScreen" id="authScreen" aria-label="Masuk CEO Shopee">
+    <div class="authBrand">
+      <div class="authLogo" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M10 17h28l-2 25H12L10 17Z"/><path d="M17 18v-5a7 7 0 0 1 14 0v5"/><path d="M29 25c-1.2-2-7.8-2.1-8 1-.2 3.5 7.8 2.1 7.8 6 0 3.1-6.5 4-9.3 1.2"/></svg></div>
+      <h1>CEO Shopee</h1><p>AI Foto Produk &amp; Video</p>
+    </div>
+    <form class="authCard" id="authForm">
+      <h2 id="authTitle">Masuk dengan Email</h2>
+      <p class="authIntro" id="authIntro">Masuk untuk menyimpan hasil dan menggunakan semua fitur.</p>
+      <label class="authField"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><input id="authEmail" type="email" autocomplete="email" placeholder="Email" required></label>
+      <label class="authField"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Kata sandi (minimal 6 karakter)" required></label>
+      <button class="authSubmit" type="submit" id="authSubmit">Masuk&nbsp; →</button>
+      <div class="authMsg" id="authMsg" role="status" aria-live="polite"></div>
+      <div class="authDivider">atau</div>
+      <button class="authGoogle" type="button" id="authGoogle">🌐 &nbsp; Masuk dengan Google</button>
+      <p class="authSwitch"><span id="authSwitchText">Belum punya akun?</span> <button type="button" id="authSwitch">Daftar sekarang</button></p>
+    </form>
+    <p class="authFine">Dengan melanjutkan, Anda menyetujui penggunaan layanan CEO Shopee. Jangan gunakan kata sandi penting yang dipakai di layanan lain.</p>
+  </section>
+
+  <header><div class="headBar"><div class="brand"><div class="brandMark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 6.5 9 4.7h6l1.5 1.8H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2.5Z"/><circle cx="12" cy="12.5" r="4"/><path d="m18.2 4 .5-1.4.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5Z"/></svg></div><div>CEO Shopee<small>Studio produk AI · Shopee siap</small></div></div><div class="installControls"><button class="btn outline smallBtn" id="openSettings" type="button">Pengaturan</button><button class="btn outline smallBtn" id="installPwa" type="button">Pasang</button><small class="installHint" id="installMessage" hidden></small></div></div></header>
+  <main class="app">
+    <ol class="stepper" aria-label="Langkah aplikasi">
+      <li class="active" data-step="1"><span class="stepNum">1</span><span class="stepLabel">Upload Foto<small>Pilih dari galeri</small></span></li>
+      <li data-step="2"><span class="stepNum">2</span><span class="stepLabel">Pilih Foto AI<small>Tiga hasil otomatis</small></span></li>
+      <li data-step="3"><span class="stepNum">3</span><span class="stepLabel">Hasil Lengkap<small>Unduh dan salin</small></span></li>
+    </ol>
+
+    <section class="screen homeDashboard" id="screen1">
+      <div class="homeHero">
+        <div class="homeHeroCopy">
+          <div class="heroEyebrow">✦ STUDIO PRODUK AI</div>
+          <h1 class="screenTitle">Buat produkmu tampil <span>lebih menarik.</span></h1>
+          <p class="screenIntro">Satu foto untuk membuat materi jualan yang siap digunakan.</p>
+        </div>
+        <div class="heroVisual" aria-hidden="true">
+          <div class="heroVisualGlow"></div>
+          <div class="visualSheet visualSheetBack">✦</div>
+          <div class="visualSheet visualSheetFront"><span>▧</span><i>✦</i></div>
+        </div>
+      </div>
+
+      <div class="homeFeatureGrid" aria-label="Fitur utama">
+        <div class="homeFeature"><span class="homeFeatureIcon">▧</span><strong>Foto AI</strong><small>3 variasi produk</small></div>
+        <div class="homeFeature"><span class="homeFeatureIcon">⌕</span><strong>SEO Shopee</strong><small>Judul & deskripsi</small></div>
+        <div class="homeFeature"><span class="homeFeatureIcon">▶</span><strong>Video promosi</strong><small>Video vertikal</small></div>
+      </div>
+
+      <div class="homeSectionHeading">
+        <div><small>LANGKAH PERTAMA</small><h2>Mulai buat konten</h2></div>
+        <span class="homeStepPill">01 / 03</span>
+      </div>
+
+      <div class="panel homeCreatePanel">
+        <div class="homePanelTitle">
+          <span class="homeStepNumber">01</span>
+          <div><strong>Kenali produkmu</strong><small>Isi detail agar hasil AI lebih sesuai.</small></div>
+        </div>
+
+        <details class="optional homeProductDetails" open>
+          <summary><span class="homeDetailIcon">✦</span><span class="homeDetailLabel"><strong>Detail produk</strong><small>Nama, bahan, ukuran, keunggulan</small></span><span class="homeDetailArrow">⌄</span></summary>
+          <div class="field">
+            <label for="facts">Informasi produk (opsional)</label>
+            <textarea id="facts" placeholder="Contoh: botol 500 ml, bahan stainless, warna hitam..."></textarea>
+          </div>
+        </details>
+
+        <div class="homeUploadHeading"><div><strong>Foto produk</strong><small>Pilih foto asli dari galeri perangkat.</small></div><span>JPG · PNG · WEBP</span></div>
+        <label class="upload" for="photo">
+          <img id="photoPreview" hidden alt="Foto produk asli">
+          <span class="homeUploadGraphic" aria-hidden="true"><span>▧</span><i>+</i></span>
+          <b class="uploadTitle" id="uploadTitle">Unggah foto produk</b>
+          <small class="uploadHint" id="bgBadge">Foto jelas · maksimal 10 MB</small>
+          <span class="btn primary homeChoosePhoto">＋ &nbsp; Pilih dari galeri</span>
+        </label>
+        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp">
+        <div class="status error" id="uploadError" role="status" aria-live="polite"></div>
+        <p class="homePrivacyNote"><span>✓</span> Pastikan detail produk benar sebelum dipublikasikan.</p>
+        <p class="note"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="screen2" hidden>
+      <h1 class="screenTitle">Pilih hasil foto AI</h1>
+      <p class="screenIntro">Pilih gaya dengan pencahayaan, komposisi, dan suasana yang paling cocok. AI menata foto produk secara menyeluruh sambil menjaga bentuk, warna, label, dan detail aslinya.</p>
+      <div class="panel">
+        <div class="aiPhotoGrid" id="aiPhotoGallery"></div>
+        <div class="status" id="editStatus" role="status" aria-live="polite">AI sedang menyiapkan foto…</div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+        <button class="btn outline full" id="retryAiEdits" type="button" hidden>Ulangi foto AI yang gagal</button>
+        <button class="btn primary full" id="generate" type="button" hidden disabled>Buat SEO</button>
+        <div class="screenActions"><button class="btn outline" id="backToUpload" type="button">Ganti foto</button></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen3" hidden>
+      <h1 class="screenTitle">Hasil siap</h1>
+      <p class="screenIntro">Unduh banner, salin teks, atau buat video Shorts bersuara.</p>
+      <div class="panel resultTop"><img id="selectedPhotoPreview" alt="Foto AI terpilih"><div><strong id="selectedPhotoLabel">Foto AI terpilih</strong><small>Dipakai untuk banner, SEO, dan video</small></div></div>
+
+      <div class="panel">
+        <h2 style="font-size:17px;margin:0">Banner produk</h2>
+        <div id="bannerGrid" class="bannerGrid"></div>
+        <details class="optional"><summary>Atur tampilan banner</summary>
+          <div class="styleOptions"><button class="style active" data-style="promo" type="button">Promo</button><button class="style" data-style="minimal" type="button">Minimal</button><button class="style" data-style="lifestyle" type="button">Lifestyle</button><button class="style" data-style="modern" type="button">Modern</button></div>
+          <div class="field"><label for="format">Ukuran banner</label><select id="format"><option value="square">Persegi 1:1</option><option value="portrait">Potret 4:5</option><option value="landscape">Landscape 16:9</option></select></div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <h2 style="font-size:17px;margin:0 0 12px">Judul dan deskripsi Shopee</h2>
+        <div class="seoGrid">
+          <div class="seoField"><div class="seoHead"><strong>Judul Produk</strong><button class="copy" data-copy="title" type="button">Salin</button></div><div class="seoText" id="title">Judul SEO muncul di sini.</div><div id="count" class="status">0 karakter</div></div>
+          <div class="seoField"><div class="seoHead"><strong>Deskripsi</strong><button class="copy" data-copy="description" type="button">Salin</button></div><div class="seoText" id="description">Deskripsi muncul di sini.</div></div>
+        </div>
+        <div class="screenActions"><button class="btn outline full" id="copyAll" type="button">Salin judul dan deskripsi</button></div>
+      </div>
+
+      <div class="panel">
+        <h2 style="font-size:17px;margin:0 0 8px">Video promosi + suara AI</h2>
+        <p class="videoHelp">Format vertikal 9:16 dengan gerak kamera zoom dan pan, foto bergerak, serta teks promosi animasi. Video akhir diunduh sebagai MP4 dengan suara AI.</p>
+        <div class="videoBox"><canvas id="videoCanvas" width="720" height="1280"></canvas></div>
+        <div class="screenActions"><button class="btn primary full" id="downloadVideo" type="button" disabled aria-busy="false"><span class="videoSpinner" id="videoLoadingSpinner" aria-hidden="true" hidden></span><span id="downloadVideoLabel">Buat & unduh video MP4</span></button></div>
+        <div class="screenActions" id="videoDownloadActions" hidden><a class="btn outline full videoDownloadLink" id="videoDownloadLink" href="#" download="video-shorts-dengan-narasi-ai.mp4" hidden>Unduh MP4</a></div>
+        <div class="status" id="videoStatus" role="status" aria-live="polite">Judul dan deskripsi sedang disiapkan.</div>
+      </div>
+      <div class="screenActions"><button class="btn outline" id="backToPhotos" type="button">Pilih foto AI lain</button><button class="btn outline" id="changePhoto" type="button">Produk baru</button></div>
+    </section>
+
+    <section class="screen" id="screen4" hidden>
+      <h1 class="screenTitle">Histori</h1>
+      <p class="screenIntro">Riwayat konten yang pernah dibuat di perangkat ini.</p>
+      <div class="panel collectionPanel">
+        <p class="localDataNote">Histori disimpan hanya di browser perangkat ini. Foto yang disimpan berupa thumbnail kecil.</p>
+        <div class="collectionList" id="historyList" aria-live="polite"></div>
+        <div class="emptyState" id="historyEmpty" hidden>Belum ada histori. Buat SEO produk dari Beranda untuk memulai.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen5" hidden>
+      <h1 class="screenTitle">Hasil Saya</h1>
+      <p class="screenIntro">Konten produk tersimpan dan dapat dibuka kembali.</p>
+      <div class="panel collectionPanel">
+        <p class="localDataNote">Maksimal 20 hasil disimpan di perangkat ini. Anda dapat menghapusnya kapan saja.</p>
+        <div class="savedGrid" id="savedResults" aria-live="polite"></div>
+        <div class="emptyState" id="savedEmpty" hidden>Belum ada hasil tersimpan. Hasil baru muncul setelah SEO selesai dibuat.</div>
+      </div>
+    </section>
+  </main>
+  <dialog id="settingsDialog" class="settingsDialog" aria-labelledby="settingsTitle">
+    <div class="settingsBody">
+      <div class="settingsHead"><h2 id="settingsTitle">Pengaturan</h2><button class="btn outline smallBtn" id="closeSettings" type="button">Tutup</button></div>
+      <div class="profileHero">
+        <div class="profileAvatar" id="profileAvatar">P</div>
+        <div class="profileHeroText"><strong id="profileName">Pengguna</strong><small id="profileEmail">email@contoh.com</small></div>
+      </div>
+      <div class="settingsSectionTitle">Akun</div>
+      <div class="settingsMenu">
+        <button class="settingsMenuRow" id="editProfileButton" type="button"><span class="settingsMenuIcon">♙</span><span class="settingsMenuText"><strong>Profil pengguna</strong><small>Lihat email akun yang sedang digunakan</small></span><span class="settingsChevron">›</span></button>
+        <div class="settingsMenuRow"><span class="settingsMenuIcon">▦</span><span class="settingsMenuText"><strong>Versi aplikasi</strong><small>CEO Shopee · versi 1.0.0 (1)</small></span></div>
+      </div>
+      <div class="settingsSectionTitle">Layanan AI</div>
+      <section class="panel" style="margin:0;padding:15px">
+        <div style="display:flex;align-items:center;gap:12px"><span class="settingsMenuIcon">☁</span><div style="flex:1"><strong>Status layanan AI</strong><p class="settingsNote" style="margin:5px 0 0">Periksa koneksi server sebelum membuat konten.</p></div></div>
+        <div class="settingsActions" style="margin-top:14px"><button class="btn outline full" id="checkServices" type="button">Periksa koneksi</button></div>
+        <p class="settingsStatus" id="settingsStatus" role="status" aria-live="polite">Belum diperiksa.</p>
+      </section>
+      <div class="settingsSectionTitle">Informasi</div>
+      <div class="settingsMenu">
+        <button class="settingsMenuRow" id="privacyInfoButton" type="button"><span class="settingsMenuIcon">▤</span><span class="settingsMenuText"><strong>Kebijakan Privasi</strong><small>Penggunaan foto dan informasi Anda</small></span><span class="settingsChevron">›</span></button>
+        <button class="settingsMenuRow" id="aboutInfoButton" type="button"><span class="settingsMenuIcon">ⓘ</span><span class="settingsMenuText"><strong>Tentang aplikasi</strong><small>CEO Shopee · AI Foto Produk &amp; Video</small></span><span class="settingsChevron">›</span></button>
+      </div>
+      <button class="btn outline full" id="logoutButton" type="button" style="margin-top:18px;color:#b42318;border-color:#f0caca">Keluar dari akun</button>
+    </div>
+  </dialog>
+  <nav class="bottomTabs" aria-label="Menu utama">
+    <div class="bottomTabsInner">
+      <button class="bottomTab active" type="button" data-menu="home" aria-current="page" aria-label="Beranda"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg><span>Beranda</span></button>
+      <button class="bottomTab" type="button" data-menu="history" aria-label="Histori"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.65-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Histori</span></button>
+      <button class="bottomTab" type="button" data-menu="results" aria-label="Hasil Saya"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 2h9v11H3z"/><path d="M12 12v5m-2-2 2 2 2-2"/></svg><span>Hasil Saya</span></button>
+      <button class="bottomTab" type="button" data-menu="settings" aria-label="Pengaturan"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8.1 8.1 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8.1 8.1 0 0 1-1.8-1l-1.6.6-1.4-2.4 1.4-1.1a7.2 7.2 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.6a8.1 8.1 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8.1 8.1 0 0 1 1.8 1l1.6-.6 1.4 2.4-1.4 1.1a7.2 7.2 0 0 1 0 1.9Z"/></svg><span>Pengaturan</span></button>
+    </div>
+  </nav>
+  <footer class="foot">Periksa kembali fakta produk sebelum dipublikasikan.</footer>
+  <script src="./app.js"></script>
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult,
+  onAuthStateChanged, signOut, setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+(() => {
+  const $ = id => document.getElementById(id);
+
+  // GANTI nilai di bawah ini dengan konfigurasi Web App dari Firebase Console.
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdFrtZ-FSnssN4v7E9U-8fCUUWtcJ23qo",
+    authDomain: "ceo-shoppe.firebaseapp.com",
+    projectId: "ceo-shoppe",
+    storageBucket: "ceo-shoppe.firebasestorage.app",
+    messagingSenderId: "256752074588",
+    appId: "1:256752074588:web:a506510bf3b46166ab8b99",
+    measurementId: "G-54M87V1GV6"
+  };
+
+  const authScreen = $("authScreen");
+  const form = $("authForm");
+  const googleButton = $("authGoogle");
+  let registerMode = false;
+  let firebaseReady = false;
+
+  const showMessage = (message, isError = true) => {
+    const el = $("authMsg");
+    el.textContent = message;
+    el.style.color = isError ? "#b42318" : "#07875b";
+  };
+  const showLogin = () => {
+    document.body.classList.add("auth-locked");
+    authScreen.hidden = false;
+  };
+  const friendlyError = error => {
+    const codes = {
+      "auth/invalid-email": "Format email tidak valid.",
+      "auth/missing-password": "Masukkan kata sandi.",
+      "auth/weak-password": "Kata sandi terlalu lemah. Gunakan minimal 6 karakter.",
+      "auth/email-already-in-use": "Email sudah terdaftar. Silakan masuk.",
+      "auth/invalid-credential": "Email atau kata sandi salah.",
+      "auth/user-not-found": "Akun tidak ditemukan. Silakan daftar terlebih dahulu.",
+      "auth/wrong-password": "Kata sandi salah.",
+      "auth/popup-closed-by-user": "Proses login dibatalkan.",
+      "auth/unauthorized-domain": "Domain situs belum diizinkan di Firebase Authentication.",
+      "auth/network-request-failed": "Koneksi internet bermasalah. Coba lagi."
+    };
+    return codes[error?.code] || `Login gagal: ${error?.message || "Terjadi kesalahan."}`;
+  };
+
+  const showUser = user => {
+    if (!user) {
+      showLogin();
+      $("profileEmail").textContent = "Belum masuk";
+      $("profileName").textContent = "Pengguna";
+      $("profileAvatar").textContent = "P";
+      return;
+    }
+    document.body.classList.remove("auth-locked");
+    authScreen.hidden = true;
+    $("profileEmail").textContent = user.email || "Akun Google";
+    const displayName = user.displayName || (user.email || "Pengguna").split("@")[0];
+    $("profileName").textContent = displayName.replace(/[._-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    $("profileAvatar").textContent = (displayName[0] || "P").toUpperCase();
+  };
+
+  const configReady = Object.values(firebaseConfig).every(value =>
+    value && !String(value).startsWith("ISI_")
+  );
+
+  let auth = null;
+  let googleProvider = null;
+  if (configReady) {
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      googleProvider = new GoogleAuthProvider();
+      googleProvider.setCustomParameters({ prompt: "select_account" });
+      firebaseReady = true;
+      setPersistence(auth, browserLocalPersistence).catch(error => showMessage(friendlyError(error)));
+      getRedirectResult(auth).catch(error => showMessage(friendlyError(error)));
+      onAuthStateChanged(auth, user => {
+        if (user) showUser(user);
+        // If Firebase has no user, leave the existing Supabase email-login flow in control.
+      });
+    } catch (error) {
+      showMessage("Firebase belum dapat dimulai. Periksa konfigurasi Firebase Web App.");
+      showLogin();
+    }
+  } else {
+    showLogin();
+    showMessage("Konfigurasi Firebase belum diisi. Masukkan konfigurasi Web App agar login aktif.");
+  }
+
+  googleButton.addEventListener("click", async () => {
+    if (!firebaseReady || !auth || !googleProvider) {
+      showMessage("Login Google belum aktif. Isi firebaseConfig dari Firebase Console terlebih dahulu.");
+      return;
+    }
+    googleButton.disabled = true;
+    googleButton.textContent = "Mengalihkan ke Google...";
+    try {
+      await signInWithRedirect(auth, googleProvider);
+    } catch (error) {
+      showMessage(friendlyError(error));
+      googleButton.disabled = false;
+      googleButton.textContent = "🌐  Masuk dengan Google";
+    }
+  });
+
+  $("editProfileButton").addEventListener("click", () => {
+    const user = auth?.currentUser;
+    if (user) {
+      window.alert("Profil pengguna\nNama: " + (user.displayName || "Pengguna") +
+        "\nEmail: " + (user.email || "-") +
+        "\nMetode masuk: " + (user.providerData[0]?.providerId || "Firebase"));
+    } else {
+      window.alert("Anda belum masuk.");
+    }
+  });
+
+  $("privacyInfoButton").addEventListener("click", () => window.alert(
+    "Privasi & keamanan\nFoto produk yang dipilih dapat dikirim ke layanan AI untuk diproses. Hindari mengunggah foto sensitif dan periksa hasil sebelum dipublikasikan."
+  ));
+  $("aboutInfoButton").addEventListener("click", () => window.alert(
+    "CEO Shopee\nAI Foto Produk & Video\nVersi 1.0.0 (1)"
+  ));
+
+  $("logoutButton").addEventListener("click", async () => {
+    if (!auth) return;
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+        $("authPassword").value = "";
+        showMessage("");
+        const dlg = $("settingsDialog");
+        if (dlg?.open) dlg.close();
+        showLogin();
+      }
+    } catch (error) {
+      window.alert(friendlyError(error));
+    }
+  });
+})();
+</script>
+</body>
+</html>
