@@ -706,8 +706,8 @@ function downloadBlob(blob, filename) {
 function autoGenerateCeoIfReady(runId = uploadGeneration) {
   if (autoCeoStartedRun === runId || seoRequestBusy || productData || !getProductName()) return;
   const readyCount = aiPhotos.filter(Boolean).length;
-  if (readyCount < AI_PHOTO_VARIANTS.length) return;
-  const index = 0;
+  if (readyCount < 1) return;
+  const index = aiPhotos.findIndex(Boolean);
   autoCeoStartedRun = runId;
   if (selectedVariantIndex !== index) selectAiPhoto(index);
   $("#status").textContent = "Foto siap. AI sedang membuat CEO otomatis…";
@@ -802,11 +802,11 @@ async function generateAiPhotos(file, runId) {
   $("#editStatus").classList.remove("isLoading");
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
-    $("#editStatus").textContent = "3 foto AI berbeda siap. AI akan membuat CEO otomatis dari foto utama.";
+    $("#editStatus").textContent = "Foto AI siap. CEO dan video dibuat otomatis.";
     $("#retryAiEdits").hidden = true;
     autoGenerateCeoIfReady(runId);
   } else if (readyCount > 0) {
-    $("#editStatus").textContent = `Sebagian foto AI berhasil dibuat. Ulangi agar 3 foto berbeda lengkap.`;
+    $("#editStatus").textContent = `Foto AI siap. CEO dan video dibuat otomatis dari foto yang berhasil.`;
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
     autoGenerateCeoIfReady(runId);
