@@ -37,6 +37,7 @@ let uploadGeneration = 0;
 let seoRequestBusy = false;
 let seoGeneration = 0;
 let autoCeoStartedRun = 0;
+let autoVideoStartedRun = 0;
 let videoExportBusy = false;
 let activeVideoDownloadUrl = null;
 let videoPreviewFrame = 0;
@@ -831,6 +832,7 @@ $("#photo").onchange = (event) => {
   }
   const runId = ++uploadGeneration;
   autoCeoStartedRun = 0;
+  autoVideoStartedRun = 0;
   if (imageUrl) URL.revokeObjectURL(imageUrl);
   aiPhotoUrls.forEach((url) => url && URL.revokeObjectURL(url));
   aiPhotoUrls = [];
@@ -860,7 +862,7 @@ $("#photo").onchange = (event) => {
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
     $("#status").textContent = "Foto diterima. Ketik nama produk sekali, lalu tekan Buat Foto dengan AI.";
-    $("#videoStatus").textContent = "Buat CEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
+    $("#videoStatus").textContent = "Setelah CEO selesai, video Shorts dibuat otomatis dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
     renderAiPhotoGallery();
@@ -1081,11 +1083,12 @@ $("#generate").onclick = async () => {
     $("#count").textContent = `${faithfulCopy.title.length} karakter`;
     renderAll();
     $("#downloadVideo").disabled = videoExportBusy || !productData.narration;
-    $("#videoStatus").textContent = "Siap: satu ketukan membuat dan mengunduh video Shorts bersuara AI.";
+    $("#videoStatus").textContent = "CEO selesai. Video Shorts akan dibuat otomatis dengan suara AI.";
     $("#status").textContent = savedLocally
       ? "Selesai. Hasil tersimpan di Hasil Saya pada perangkat ini. Tinjau kembali sebelum digunakan."
       : "Selesai. Tinjau kembali sebelum digunakan. Penyimpanan Histori browser tidak tersedia.";
     showScreen(3);
+    autoGenerateVideo(runId);
   } catch (error) {
     if (requestId === seoGeneration && runId === uploadGeneration) {
       $("#status").textContent = error.message;
@@ -1102,6 +1105,15 @@ $("#generate").onclick = async () => {
     }
   }
 };
+
+function autoGenerateVideo(runId = uploadGeneration) {
+  if (autoVideoStartedRun === runId || videoExportBusy || !productData?.narration) return;
+  autoVideoStartedRun = runId;
+  $("#videoStatus").textContent = "CEO selesai. Video Shorts sedang dibuat otomatis…";
+  setTimeout(() => {
+    if (runId === uploadGeneration && productData?.narration && !videoExportBusy) $("#downloadVideo").click();
+  }, 350);
+}
 
 $("#downloadVideo").onclick = async () => {
   if (!image || !productData?.narration) return;
