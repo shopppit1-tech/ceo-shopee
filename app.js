@@ -1210,8 +1210,7 @@ $("#downloadVideo").onclick = async () => {
         downloadLink.href = activeVideoDownloadUrl;
         downloadLink.hidden = false;
         $("#videoDownloadActions").hidden = false;
-        downloadLink.click();
-        $("#videoStatus").textContent = "MP4 siap. Jika unduhan tidak dimulai otomatis, tekan tombol Unduh MP4.";
+        $("#videoStatus").textContent = "MP4 siap. Video tampil di layar; tekan Unduh MP4 untuk menyimpan.";
       } catch (error) {
         $("#videoStatus").textContent = error.message || "Konversi MP4 gagal. Coba lagi.";
       } finally {
