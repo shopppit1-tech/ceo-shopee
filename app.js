@@ -31,6 +31,7 @@ let aiPhotoErrors = Array(AI_PHOTO_VARIANTS.length).fill(null);
 let aiPhotoUrls = [];
 let selectedVariantIndex = null;
 let selectedStyle = "promo";
+let selectedTemplateStyle = "marketplace";
 let uploadGeneration = 0;
 let seoRequestBusy = false;
 let seoGeneration = 0;
@@ -538,12 +539,9 @@ function renderAiTemplates() {
   const name = getProductName() || productData?.headline || "Produk Pilihan";
   const description = productData?.description || getProductContext() || "Konten promosi produk siap digunakan.";
   const short = description.length > 85 ? `${description.slice(0, 82).replace(/\s+\S*$/, "")}…` : description;
-  const templates = [
-    ["Promo Unggulan", "Diskon & manfaat utama"],
-    ["Natural Fresh", "Cocok untuk katalog"],
-    ["Marketplace", "Harga & keunggulan"],
-    ["Premium Minimal", "Tampilan elegan"],
-  ];
+  const templateMap = { marketplace: ["Marketplace", "Harga & keunggulan"], story: ["Story Promo", "Format vertikal 9:16"], catalog: ["Katalog", "Gaya katalog rapi"], premium: ["Premium Look", "Tampilan berkelas"] };
+  const selected = templateMap[selectedTemplateStyle] || templateMap.marketplace;
+  const templates = [selected, ["Promo Unggulan", "Diskon & manfaat utama"], ["Natural Fresh", "Cocok untuk katalog"], ["Premium Minimal", "Tampilan elegan"]];
   gallery.replaceChildren(...templates.map(([label, hint]) => {
     const card = document.createElement("article");
     card.className = "templateCard";
@@ -904,6 +902,23 @@ document.querySelectorAll(".bottomTab").forEach((tab) => {
       renderSavedCollections();
       showScreen(5);
     } else if (menu === "settings") openSettingsMenu();
+  };
+});
+
+document.querySelectorAll("[data-banner-choice]").forEach((button) => {
+  button.onclick = () => {
+    selectedStyle = button.dataset.bannerChoice;
+    document.querySelectorAll("[data-banner-choice]").forEach((item) => item.classList.toggle("selected", item === button));
+    document.querySelectorAll(".style").forEach((item) => item.classList.toggle("active", selectedStyle === item.dataset.style));
+    const status = $("#uploadError");
+    if (status) status.textContent = `Banner ${button.querySelector("strong")?.textContent || "dipilih"} akan dipakai pada hasil.`;
+  };
+});
+document.querySelectorAll("[data-template-choice]").forEach((button) => {
+  button.onclick = () => {
+    selectedTemplateStyle = button.dataset.templateChoice;
+    document.querySelectorAll("[data-template-choice]").forEach((item) => item.classList.toggle("selected", item === button));
+    renderAiTemplates();
   };
 });
 
