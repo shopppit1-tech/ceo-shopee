@@ -515,13 +515,65 @@ function syncProductContext() {
   return context.trim();
 }
 
+function getProductName() {
+  return String($("#productName")?.value || "").replace(/\s+/g, " ").trim();
+}
+
+function ensureProductNameInCopy(productName, title, description) {
+  const name = String(productName || "").trim();
+  if (!name) return { title: String(title || ""), description: String(description || "") };
+  const normalized = (value) => value.toLocaleLowerCase("id-ID").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const key = normalized(name);
+  const safeTitle = String(title || "").trim();
+  const safeDescription = String(description || "").trim();
+  return {
+    title: normalized(safeTitle).includes(key) ? safeTitle : `${name} | ${safeTitle}`,
+    description: normalized(safeDescription).includes(key) ? safeDescription : `${name}. ${safeDescription}`,
+  };
+}
+
+function renderAiTemplates() {
+  const gallery = $("#templateGallery");
+  if (!gallery) return;
+  const name = getProductName() || productData?.headline || "Produk Pilihan";
+  const description = productData?.description || getProductContext() || "Konten promosi produk siap digunakan.";
+  const short = description.length > 85 ? `${description.slice(0, 82).replace(/\s+\S*$/, "")}…` : description;
+  const templates = [
+    ["Promo Unggulan", "Diskon & manfaat utama"],
+    ["Natural Fresh", "Cocok untuk katalog"],
+    ["Marketplace", "Harga & keunggulan"],
+    ["Premium Minimal", "Tampilan elegan"],
+  ];
+  gallery.replaceChildren(...templates.map(([label, hint]) => {
+    const card = document.createElement("article");
+    card.className = "templateCard";
+    const visual = document.createElement("div");
+    visual.className = "templateVisual";
+    const title = document.createElement("strong");
+    title.textContent = name;
+    const copy = document.createElement("small");
+    copy.textContent = short;
+    visual.append(title, copy);
+    const meta = document.createElement("div");
+    meta.className = "templateMeta";
+    meta.append(document.createTextNode(label));
+    const metaHint = document.createElement("small");
+    metaHint.textContent = hint;
+    meta.append(metaHint);
+    card.append(visual, meta);
+    return card;
+  }));
+}
+
 function buildSeoContext(productContext) {
+  const productName = getProductName();
   return [
     "INSTRUKSI AKURASI WAJIB:",
     "Gunakan deskripsi pemilik di bawah sebagai sumber kebenaran utama tentang NAMA dan JENIS PRODUK.",
     "Foto bisa menampilkan kantong, botol, kotak, label, atau kemasan; jangan menjadikan kemasan sebagai nama produk.",
     "Jangan mengganti produk dengan benda kemasan. Jika deskripsi menyebut terong kering, maka judul dan deskripsi WAJIB membahas terong kering; kantong hanya boleh disebut sebagai kemasan bila terlihat.",
     "Jangan mengarang jenis produk, bahan, manfaat, ukuran, atau klaim yang tidak didukung deskripsi pemilik atau foto.",
+    `NAMA PRODUK PERSIS (WAJIB DIPERTAHANKAN): ${productName}`,
     `DESKRIPSI PEMILIK: ${productContext}`,
   ].join("\n");
 }
@@ -533,6 +585,7 @@ function renderAll() {
   drawBanner(canvas, selectedStyle);
   bannerCard.querySelector("strong").textContent = `Satu Banner · ${names[selectedStyle]}`;
   const hasAiPhoto = aiPhotos.some(Boolean);
+  renderAiTemplates();
   $("#downloadBanner").disabled = !hasAiPhoto;
   $("#downloadBanner").onclick = () => saveCanvas(canvas, `banner-${selectedStyle}.png`);
   $("#generate").disabled = !hasAiPhoto || !getProductContext();
@@ -888,14 +941,17 @@ $("#checkServices").onclick = async () => {
   }
 };
 
-$("#productContext")?.addEventListener("input", () => {
+const updateSeoReadiness = () => {
   const context = syncProductContext();
+  const name = getProductName();
   const hasAiPhoto = aiPhotos.some(Boolean);
-  $("#generate").disabled = !hasAiPhoto || !context;
+  $("#generate").disabled = !hasAiPhoto || !name || !context;
   if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
     $("#status").textContent = "Deskripsi sudah siap. Tekan Buat SEO untuk melanjutkan.";
   }
-});
+};
+$("#productContext")?.addEventListener("input", updateSeoReadiness);
+$("#productName")?.addEventListener("input", updateSeoReadiness);
 
 $("#format").onchange = renderAll;
 
@@ -920,6 +976,15 @@ $("#generate").onclick = async () => {
     const form = new FormData();
     form.append("photo", activeBlob, activeFileName || sourceFile?.name || "foto-produk.png");
     const productContext = syncProductContext();
+    const productName = getProductName();
+    if (!productName) {
+      button.disabled = true;
+      button.hidden = false;
+      $("#status").classList.remove("isLoading");
+      $("#status").textContent = "Nama produk wajib diisi agar AI tidak salah mengenali kemasan sebagai produk.";
+      seoRequestBusy = false;
+      return;
+    }
     if (!productContext) {
       button.disabled = true;
       button.hidden = false;
@@ -930,23 +995,25 @@ $("#generate").onclick = async () => {
     }
     form.append("extra", buildSeoContext(productContext));
     form.append("product_context", productContext);
+    form.append("product_name", productName);
     const response = await fetch(apiUrl("/api/seo"), { method: "POST", body: form });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
     if (requestId !== seoGeneration || runId !== uploadGeneration) return;
+    const faithfulCopy = ensureProductNameInCopy(productName, result.title, result.description);
     productData = {
-      title: String(result.title || ""),
-      description: String(result.description || ""),
-      headline: String(result.title || "Produk pilihan Anda"),
+      title: faithfulCopy.title,
+      description: faithfulCopy.description,
+      headline: faithfulCopy.title || productName,
       keywords: [],
       narration: makeVideoNarration(result.title, result.description),
     };
     button.hidden = true;
     button.textContent = "Buat SEO";
     const savedLocally = saveCurrentResult();
-    $("#title").textContent = result.title || "";
-    $("#description").textContent = result.description || "";
-    $("#count").textContent = `${(result.title || "").length} karakter`;
+    $("#title").textContent = faithfulCopy.title;
+    $("#description").textContent = faithfulCopy.description;
+    $("#count").textContent = `${faithfulCopy.title.length} karakter`;
     renderAll();
     $("#downloadVideo").disabled = videoExportBusy || !productData.narration;
     $("#videoStatus").textContent = "Siap: satu ketukan membuat dan mengunduh video Shorts bersuara AI.";
