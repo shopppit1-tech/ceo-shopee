@@ -189,7 +189,7 @@
     return;
   }
   try {
-    supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+    supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "ceo-shopee-supabase-session", storage: window.localStorage } });
   } catch (_) {
     showLogin();
     setMessage("Layanan login email gagal dimulai. Muat ulang aplikasi dan coba lagi.");
