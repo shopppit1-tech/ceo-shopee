@@ -505,15 +505,15 @@ function stopVideoPreview() {
 }
 
 function getProductContext() {
-  return String($("#productContext")?.value || $("#facts")?.value || "").replace(/\s+/g, " ").trim();
+  const name = getProductName();
+  if (!name) return "";
+  return `Produk bernama ${name}. Buat deskripsi produk yang akurat berdasarkan nama dan foto, tanpa mengganti nama produk dengan nama kemasan.`;
 }
-
 function syncProductContext() {
-  const context = $("#productContext")?.value || "";
+  const context = getProductContext();
   if ($("#facts")) $("#facts").value = context;
-  return context.trim();
+  return context;
 }
-
 function getProductName() {
   return String($("#productName")?.value || "").replace(/\s+/g, " ").trim();
 }
@@ -971,10 +971,9 @@ const updateSeoReadiness = () => {
   if (hasAiPhoto && selectedVariantIndex !== null && !productData) $("#generate").hidden = false;
   $("#generate").disabled = !hasAiPhoto || !name || !context;
   if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
-    $("#status").textContent = "Deskripsi sudah siap. Tekan Buat SEO untuk melanjutkan.";
+    $("#status").textContent = "Nama produk siap. Tekan Buat SEO agar AI membuat konten otomatis.";
   }
 };
-$("#productContext")?.addEventListener("input", updateSeoReadiness);
 $("#productName")?.addEventListener("input", updateSeoReadiness);
 
 $("#format").onchange = renderAll;
@@ -1013,7 +1012,7 @@ $("#generate").onclick = async () => {
       button.disabled = true;
       button.hidden = false;
       $("#status").classList.remove("isLoading");
-      $("#status").textContent = "Deskripsi produk wajib diisi agar hasil CEO lebih akurat.";
+      $("#status").textContent = "Ketik nama produk agar AI dapat membuat konten CEO.";
       seoRequestBusy = false;
       return;
     }
