@@ -147,7 +147,7 @@
     .authDivider{display:flex;align-items:center;gap:12px;color:#888299;font-size:12px;margin:18px 0}.authDivider:before,.authDivider:after{content:"";height:1px;flex:1;background:#e9e4f4}
     .authGoogle{width:100%;min-height:49px;border:1px solid #ddd6ee;border-radius:12px;background:#fff;color:#39324e;font-weight:750}
     .authSwitch{text-align:center;margin:19px 0 0;color:#777286;font-size:12px}.authSwitch button{border:0;background:transparent;color:#6024e8;font-weight:850;padding:4px}
-    .authMsg{min-height:18px;margin:10px 0 0;color:#b42318;font-size:12px;line-height:1.4}.authFine{max-width:430px;margin:15px 4px 0;color:#f5edff;text-align:center;font-size:10px;line-height:1.5}
+    .authMsg{min-height:18px;margin:10px 0 0;color:#b42318;font-size:12px;line-height:1.4}.authMsg.is-success{color:#047857}.authFine{max-width:430px;margin:15px 4px 0;color:#f5edff;text-align:center;font-size:10px;line-height:1.5}
     .profileHero{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(135deg,#f5efff,#fff)}
     .profileAvatar{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:50%;background:#eee7ff;color:#6727ef;font-size:25px;font-weight:850}
     .profileHeroText{flex:1;min-width:0}.profileHeroText strong{display:block;font-size:16px;overflow-wrap:anywhere}.profileHeroText small{display:block;margin-top:4px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
@@ -169,7 +169,7 @@
     </div>
     <form class="authCard" id="authForm">
       <h2 id="authTitle">Masuk dengan Email</h2>
-      <p class="authIntro" id="authIntro">Masuk untuk menyimpan hasil dan menggunakan semua fitur.</p>
+      <p class="authIntro" id="authIntro">Masuk dengan email untuk menggunakan aplikasi CEO Shopee.</p>
       <label class="authField"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><input id="authEmail" type="email" autocomplete="email" placeholder="Email" required></label>
       <label class="authField"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Kata sandi (minimal 6 karakter)" required></label>
       <button class="authSubmit" type="submit" id="authSubmit">Masuk&nbsp; →</button>
@@ -346,59 +346,8 @@
   </nav>
   <footer class="foot">Periksa kembali fakta produk sebelum dipublikasikan.</footer>
   <script src="./app.js"></script>
-  <script>
-(() => {
-  const $ = id => document.getElementById(id);
-  const authScreen = $('authScreen');
-  const form = $('authForm');
-  let registerMode = false;
-  const getSavedEmail = () => { try { return localStorage.getItem('ceoShopeeUserEmail') || ''; } catch (_) { return ''; } };
-  const setUserEmail = email => {
-    try { localStorage.setItem('ceoShopeeUserEmail', email); } catch (_) {}
-    document.body.classList.remove('auth-locked');
-    authScreen.hidden = true;
-    $('profileEmail').textContent = email;
-    $('profileName').textContent = (email.split('@')[0] || 'Pengguna').replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    $('profileAvatar').textContent = (email[0] || 'P').toUpperCase();
-  };
-  const showLogin = () => { document.body.classList.add('auth-locked'); authScreen.hidden = false; };
-  const saved = getSavedEmail();
-  if (saved) setUserEmail(saved); else showLogin();
-
-  $('authSwitch').addEventListener('click', () => {
-    registerMode = !registerMode;
-    $('authTitle').textContent = registerMode ? 'Buat Akun' : 'Masuk dengan Email';
-    $('authIntro').textContent = registerMode ? 'Buat akun untuk mulai menggunakan CEO Shopee.' : 'Masuk untuk menyimpan hasil dan menggunakan semua fitur.';
-    $('authSubmit').textContent = registerMode ? 'Daftar Akun →' : 'Masuk →';
-    $('authSwitchText').textContent = registerMode ? 'Sudah punya akun?' : 'Belum punya akun?';
-    $('authSwitch').textContent = registerMode ? 'Masuk sekarang' : 'Daftar sekarang';
-    $('authPassword').autocomplete = registerMode ? 'new-password' : 'current-password';
-    $('authMsg').textContent = '';
-  });
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const email = $('authEmail').value.trim().toLowerCase();
-    const password = $('authPassword').value;
-    if (!email || password.length < 6) { $('authMsg').textContent = 'Masukkan email yang valid dan kata sandi minimal 6 karakter.'; return; }
-    // Front-end gate only; real identity verification must be connected to Firebase Auth or a backend.
-    setUserEmail(email);
-  });
-  $('authGoogle').addEventListener('click', () => {
-    $('authMsg').textContent = 'Login Google belum diaktifkan. Hubungkan Firebase Authentication untuk verifikasi akun.';
-  });
-  $('editProfileButton').addEventListener('click', () => {
-    const email = getSavedEmail() || $('profileEmail').textContent;
-    window.alert('Profil pengguna\nEmail: ' + email);
-  });
-  $('privacyInfoButton').addEventListener('click', () => window.alert('Privasi & keamanan\nFoto produk yang dipilih dapat dikirim ke layanan AI untuk diproses. Hindari mengunggah foto sensitif dan periksa hasil sebelum dipublikasikan.'));
-  $('aboutInfoButton').addEventListener('click', () => window.alert('CEO Shopee\nAI Foto Produk & Video\nVersi 1.0.0 (1)'));
-  $('logoutButton').addEventListener('click', () => {
-    try { localStorage.removeItem('ceoShopeeUserEmail'); } catch (_) {}
-    const dlg = $('settingsDialog'); if (dlg && dlg.open) dlg.close();
-    $('authPassword').value = ''; $('authMsg').textContent = '';
-    showLogin();
-  });
-})();
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./auth.js"></script>
 </body>
 </html>
