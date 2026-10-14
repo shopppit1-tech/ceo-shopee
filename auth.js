@@ -33,16 +33,29 @@
     window.CEO_SYNC_ADAPTER = activeProvider === "supabase" ? {
       provider: "supabase",
       async load() {
-        const { data, error } = await supabaseClient.auth.getUser();
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError) throw userError;
+        const user = userData.user;
+        if (!user) return null;
+        const { data, error } = await supabaseClient
+          .from("ceo_saved_results")
+          .select("results,updated_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
         if (error) throw error;
-        return data.user?.user_metadata?.ceoShopeeSync || null;
+        return data ? { version: 1, results: Array.isArray(data.results) ? data.results : [], updatedAt: data.updated_at } : null;
       },
       async save(state) {
-        const { data, error } = await supabaseClient.auth.getUser();
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError) throw userError;
+        const user = userData.user;
+        if (!user) return false;
+        const { error } = await supabaseClient.from("ceo_saved_results").upsert({
+          user_id: user.id,
+          results: Array.isArray(state?.results) ? state.results : [],
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
         if (error) throw error;
-        const metadata = { ...(data.user?.user_metadata || {}), ceoShopeeSync: state };
-        const result = await supabaseClient.auth.updateUser({ data: metadata });
-        if (result.error) throw result.error;
         return true;
       }
     } : null;
@@ -64,11 +77,12 @@
     emitIdentity(`supabase:${user.id}`);
     document.body.classList.remove("auth-locked");
     authScreen.hidden = true;
-    const email = user.email || "Pengguna";
-    const displayName = email.split("@")[0] || "Pengguna";
+    const email = String(user.email || "").trim().toLowerCase() || "Pengguna";
+    const displayName = email.includes("@") ? email.split("@")[0] : email;
     $("#profileEmail").textContent = email;
     $("#profileName").textContent = displayName.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
     $("#profileAvatar").textContent = (displayName[0] || "P").toUpperCase();
+    window.CEO_AUTH_EMAIL = email;
   };
 
   const supabaseError = (error) => {
