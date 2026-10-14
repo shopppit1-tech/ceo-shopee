@@ -868,7 +868,8 @@ $("#photo").onchange = (event) => {
     renderAiPhotoGallery();
     renderAll();
     $("#generateAiPhotosButton").hidden = false;
-    $("#generateAiPhotosButton").disabled = false;
+    $("#generateAiPhotosButton").disabled = !getProductName();
+    $("#generateAiPhotosButton").textContent = "Buat Semua Otomatis";
   };
   nextImage.onerror = () => {
     if (runId !== uploadGeneration) return;
