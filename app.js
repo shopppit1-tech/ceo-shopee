@@ -23,7 +23,9 @@ let activeFileName = "";
 let productData = null;
 let activeStep = 1;
 const AI_PHOTO_VARIANTS = [
-  { key: "studio", title: "Foto AI · Studio Profesional", description: "Cahaya softbox, warna akurat, komposisi katalog" },
+  { key: "studio", title: "Foto AI 1 · Studio Profesional", description: "Cahaya softbox, warna akurat, komposisi katalog" },
+  { key: "lifestyle", title: "Foto AI 2 · Lifestyle Natural", description: "Suasana relevan, cahaya alami, dekor minimal" },
+  { key: "contrast", title: "Foto AI 3 · Editorial Modern", description: "Rim light terarah, aksen kontras, framing premium" },
 ];
 let aiPhotos = Array(AI_PHOTO_VARIANTS.length).fill(null);
 let aiPhotoErrors = Array(AI_PHOTO_VARIANTS.length).fill(null);
@@ -677,7 +679,7 @@ function renderAiPhotoGallery() {
     const choose = document.createElement("button");
     choose.className = "btn primary";
     choose.type = "button";
-    choose.textContent = selectedVariantIndex === index ? "Dipakai · ketuk untuk ulang" : "Pakai foto ini";
+    choose.textContent = selectedVariantIndex === index ? "Foto utama otomatis" : "Jadikan foto utama";
     choose.disabled = seoRequestBusy;
     choose.onclick = () => selectAiPhoto(index);
     const download = document.createElement("button");
@@ -702,8 +704,9 @@ function downloadBlob(blob, filename) {
 
 function autoGenerateCeoIfReady(runId = uploadGeneration) {
   if (autoCeoStartedRun === runId || seoRequestBusy || productData || !getProductName()) return;
-  const index = aiPhotos.findIndex(Boolean);
-  if (index < 0) return;
+  const readyCount = aiPhotos.filter(Boolean).length;
+  if (readyCount < AI_PHOTO_VARIANTS.length) return;
+  const index = 0;
   autoCeoStartedRun = runId;
   if (selectedVariantIndex !== index) selectAiPhoto(index);
   $("#status").textContent = "Foto siap. AI sedang membuat CEO otomatis…";
@@ -798,11 +801,11 @@ async function generateAiPhotos(file, runId) {
   $("#editStatus").classList.remove("isLoading");
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
-    $("#editStatus").textContent = "Foto AI siap. AI akan membuat CEO otomatis.";
+    $("#editStatus").textContent = "3 foto AI berbeda siap. AI akan membuat CEO otomatis dari foto utama.";
     $("#retryAiEdits").hidden = true;
     autoGenerateCeoIfReady(runId);
   } else if (readyCount > 0) {
-    $("#editStatus").textContent = `Foto AI berhasil dibuat. AI akan memakai foto yang berhasil.`;
+    $("#editStatus").textContent = `Sebagian foto AI berhasil dibuat. Ulangi agar 3 foto berbeda lengkap.`;
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
     autoGenerateCeoIfReady(runId);
