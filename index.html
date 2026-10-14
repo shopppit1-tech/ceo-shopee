@@ -159,6 +159,10 @@
     .settingsDialog{max-height:94dvh;overflow:auto}
     @media(max-width:480px){.authScreen{padding-left:17px;padding-right:17px}.authBrand{padding-top:25px;padding-bottom:24px}.authLogo{width:88px;height:88px;border-radius:26px}.authLogo svg{width:51px;height:51px}.authBrand h1{font-size:26px}.authCard{padding:21px 17px}.settingsDialog{width:100%;max-width:none;max-height:100dvh;height:100dvh;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.settingsBody{padding:20px 17px 30px}}
 
+    /* Komposisi utama mengikuti mockup 3 panel pengguna. */
+    .referenceTopbar{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}.referenceBrand{display:flex;align-items:center;gap:10px;font-size:18px}.referenceLogo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#7d2df4,#4c1ce7);box-shadow:0 7px 15px #6121e52a}.referenceLogo svg{width:29px;height:29px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.referenceProfile{width:45px;height:45px;border:0;border-radius:50%;background:#eee8ff;color:#6425e8;font-size:26px;line-height:1;box-shadow:inset 0 0 0 1px #e4d9ff}.referencePromo{position:relative;display:flex;align-items:center;justify-content:space-between;overflow:hidden;min-height:142px;padding:20px;border-radius:20px;background:linear-gradient(110deg,#5521e8,#b84cf0);color:#fff;box-shadow:0 10px 22px #5921e52b}.referencePromo strong{display:block;font-size:25px;line-height:1.08;letter-spacing:-.7px}.referencePromo span{display:block;margin-top:10px;font-size:12px}.promoVisual{width:116px;height:110px;position:relative}.promoVisual span{position:absolute;top:0;left:10px;font-size:23px}.promoVisual b,.promoVisual i{position:absolute;display:grid;place-items:center;width:57px;height:73px;border:4px solid #eadbff;border-radius:10px;background:#ffffff40;font-size:28px;font-style:normal;box-shadow:0 5px 10px #2e0d6140}.promoVisual b{right:26px;top:22px;transform:rotate(-17deg)}.promoVisual i{right:-4px;bottom:4px;transform:rotate(15deg);background:#17244caa;border-color:#c9d2ff;font-size:24px}.referenceSteps{display:flex;align-items:center;justify-content:center;gap:8px;margin:24px 2px 18px}.referenceSteps div{display:flex;flex-direction:column;align-items:center;gap:7px;color:#666079;font-size:12px;font-weight:650;white-space:nowrap}.referenceSteps b{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#6324e9;color:#fff;font-size:22px}.referenceSteps em{width:74px;height:2px;background:#ded8ef}.referenceStart{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;font-size:16px}.referenceStart span{font-size:26px}.referenceFeatures{margin-top:27px}.referenceFeatures h1{font-size:23px;margin:0 0 14px}.featureCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.featureCards article{min-height:157px;padding:17px 14px;border-radius:17px;background:#fff;box-shadow:0 7px 20px #2b174d0b;border:1px solid #f0ebfa}.featureCards .featureIcon{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;font-size:24px;margin-bottom:11px}.featureIcon.pink{background:#f5d8ff;color:#a900e9}.featureIcon.blue{background:#dff1ff;color:#1577df}.featureIcon.mint{background:#d8f7f1;color:#0aaf8d}.featureIcon.orange{background:#ffead4;color:#ed8110}.featureCards strong,.featureCards small{display:block}.featureCards strong{font-size:14px}.featureCards small{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.4}.referenceCreatePanel{margin-top:22px}.referenceCreatePanel .homePanelTitle{margin-bottom:15px}@media(max-width:430px){.referencePromo{padding:16px;min-height:132px}.referencePromo strong{font-size:21px}.promoVisual{transform:scale(.8);transform-origin:right center;margin-left:-16px}.referenceSteps{gap:4px}.referenceSteps em{width:33px}.referenceSteps div{font-size:10px}.referenceSteps b{width:36px;height:36px;font-size:18px}.featureCards article{min-height:145px;padding:14px 12px}.referenceFeatures h1{font-size:21px}}
+    .referenceCreatePanel{display:none}
+    #openSettingsHome{cursor:pointer}
   </style>
 </head>
 <body class="auth-locked">
@@ -190,59 +194,35 @@
     </ol>
 
     <section class="screen homeDashboard" id="screen1">
-      <div class="homeHero">
-        <div class="homeHeroCopy">
-          <div class="heroEyebrow">✦ STUDIO PRODUK AI</div>
-          <h1 class="screenTitle">Buat produkmu tampil <span>lebih menarik.</span></h1>
-          <p class="screenIntro">Satu foto untuk membuat materi jualan yang siap digunakan.</p>
-        </div>
-        <div class="heroVisual" aria-hidden="true">
-          <div class="heroVisualGlow"></div>
-          <div class="visualSheet visualSheetBack">✦</div>
-          <div class="visualSheet visualSheetFront"><span>▧</span><i>✦</i></div>
-        </div>
+      <div class="referenceTopbar">
+        <div class="referenceBrand"><div class="referenceLogo" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M10 17h28l-2 25H12L10 17Z"/><path d="M17 18v-5a7 7 0 0 1 14 0v5"/><path d="M29 25c-1.2-2-7.8-2.1-8 1-.2 3.5 7.8 2.1 7.8 6 0 3.1-6.5 4-9.3 1.2"/></svg></div><strong>CEO Shopee</strong></div>
+        <button class="referenceProfile" id="openSettingsHome" type="button" aria-label="Buka pengaturan">●</button>
       </div>
-
-      <div class="homeFeatureGrid" aria-label="Fitur utama">
-        <div class="homeFeature"><span class="homeFeatureIcon">▧</span><strong>Foto AI</strong><small>3 variasi produk</small></div>
-        <div class="homeFeature"><span class="homeFeatureIcon">⌕</span><strong>SEO Shopee</strong><small>Judul & deskripsi</small></div>
-        <div class="homeFeature"><span class="homeFeatureIcon">▶</span><strong>Video promosi</strong><small>Video vertikal</small></div>
+      <div class="referencePromo">
+        <div><strong>Buat Foto Produk<br>&amp; Video AI</strong><span>Mudah, cepat dan hasil profesional</span></div>
+        <div class="promoVisual" aria-hidden="true"><span>✦</span><b>▱</b><i>◼</i></div>
       </div>
-
-      <div class="homeSectionHeading">
-        <div><small>LANGKAH PERTAMA</small><h2>Mulai buat konten</h2></div>
-        <span class="homeStepPill">01 / 03</span>
+      <div class="referenceSteps" aria-label="Alur pembuatan konten">
+        <div><b>1</b><span>Upload Foto</span></div><em></em><div><b>2</b><span>Pilih Gaya</span></div><em></em><div><b>3</b><span>Hasil Siap</span></div>
       </div>
-
-      <div class="panel homeCreatePanel">
-        <div class="homePanelTitle">
-          <span class="homeStepNumber">01</span>
-          <div><strong>Kenali produkmu</strong><small>Isi detail agar hasil AI lebih sesuai.</small></div>
+      <button class="btn primary referenceStart" id="startNow" type="button"><span>✦</span> Mulai Sekarang</button>
+      <section class="referenceFeatures">
+        <h1>Fitur Utama</h1>
+        <div class="featureCards">
+          <article><span class="featureIcon pink">▧</span><strong>Foto Produk</strong><small>Buat foto produk<br>menarik dengan AI</small></article>
+          <article><span class="featureIcon blue">▣</span><strong>Banner</strong><small>Desain banner<br>siap pakai</small></article>
+          <article><span class="featureIcon mint">▶</span><strong>Video Shorts</strong><small>Buat video promosi<br>dari foto produk</small></article>
+          <article><span class="featureIcon orange">▦</span><strong>Template</strong><small>Aneka template<br>siap digunakan</small></article>
         </div>
-
-        <details class="optional homeProductDetails" open>
-          <summary><span class="homeDetailIcon">✦</span><span class="homeDetailLabel"><strong>Detail produk</strong><small>Nama, bahan, ukuran, keunggulan</small></span><span class="homeDetailArrow">⌄</span></summary>
-          <div class="field">
-            <label for="facts">Informasi produk (opsional)</label>
-            <textarea id="facts" placeholder="Contoh: botol 500 ml, bahan stainless, warna hitam..."></textarea>
-          </div>
-        </details>
-
+      </section>
+      <div class="panel homeCreatePanel referenceCreatePanel">
+        <div class="homePanelTitle"><span class="homeStepNumber">01</span><div><strong>Kenali produkmu</strong><small>Isi detail agar hasil AI lebih sesuai.</small></div></div>
+        <details class="optional homeProductDetails" open><summary><span class="homeDetailIcon">✦</span><span class="homeDetailLabel"><strong>Detail produk</strong><small>Nama, bahan, ukuran, keunggulan</small></span><span class="homeDetailArrow">⌄</span></summary><div class="field"><label for="facts">Informasi produk (opsional)</label><textarea id="facts" placeholder="Contoh: botol 500 ml, bahan stainless, warna hitam..."></textarea></div></details>
         <div class="homeUploadHeading"><div><strong>Foto produk</strong><small>Pilih foto asli dari galeri perangkat.</small></div><span>JPG · PNG · WEBP</span></div>
-        <label class="upload" for="photo">
-          <img id="photoPreview" hidden alt="Foto produk asli">
-          <span class="homeUploadGraphic" aria-hidden="true"><span>▧</span><i>+</i></span>
-          <b class="uploadTitle" id="uploadTitle">Unggah foto produk</b>
-          <small class="uploadHint" id="bgBadge">Foto jelas · maksimal 10 MB</small>
-          <span class="btn primary homeChoosePhoto">＋ &nbsp; Pilih dari galeri</span>
-        </label>
-        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp">
-        <div class="status error" id="uploadError" role="status" aria-live="polite"></div>
-        <p class="homePrivacyNote"><span>✓</span> Pastikan detail produk benar sebelum dipublikasikan.</p>
-        <p class="note"></p>
+        <label class="upload" for="photo"><img id="photoPreview" hidden alt="Foto produk asli"><span class="homeUploadGraphic" aria-hidden="true"><span>▧</span><i>+</i></span><b class="uploadTitle" id="uploadTitle">Unggah foto produk</b><small class="uploadHint" id="bgBadge">Foto jelas · maksimal 10 MB</small><span class="btn primary homeChoosePhoto">＋ &nbsp; Pilih dari galeri</span></label>
+        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp"><div class="status error" id="uploadError" role="status" aria-live="polite"></div><p class="homePrivacyNote"><span>✓</span> Pastikan detail produk benar sebelum dipublikasikan.</p><p class="note"></p>
       </div>
     </section>
-
     <section class="screen" id="screen2" hidden>
       <h1 class="screenTitle">Pilih hasil foto AI</h1>
       <p class="screenIntro">Pilih gaya dengan pencahayaan, komposisi, dan suasana yang paling cocok. AI menata foto produk secara menyeluruh sambil menjaga bentuk, warna, label, dan detail aslinya.</p>
@@ -339,13 +319,14 @@
   <nav class="bottomTabs" aria-label="Menu utama">
     <div class="bottomTabsInner">
       <button class="bottomTab active" type="button" data-menu="home" aria-current="page" aria-label="Beranda"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg><span>Beranda</span></button>
-      <button class="bottomTab" type="button" data-menu="history" aria-label="Histori"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.65-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Histori</span></button>
-      <button class="bottomTab" type="button" data-menu="results" aria-label="Hasil Saya"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 2h9v11H3z"/><path d="M12 12v5m-2-2 2 2 2-2"/></svg><span>Hasil Saya</span></button>
+      <button class="bottomTab" type="button" data-menu="history" aria-label="Histori"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.65-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Galeri</span></button>
+      <button class="bottomTab" type="button" data-menu="results" aria-label="Hasil Saya"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 2h9v11H3z"/><path d="M12 12v5m-2-2 2 2 2-2"/></svg><span>Buat</span></button>
       <button class="bottomTab" type="button" data-menu="settings" aria-label="Pengaturan"><svg class="menuIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8.1 8.1 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8.1 8.1 0 0 1-1.8-1l-1.6.6-1.4-2.4 1.4-1.1a7.2 7.2 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.6a8.1 8.1 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8.1 8.1 0 0 1 1.8 1l1.6-.6 1.4 2.4-1.4 1.1a7.2 7.2 0 0 1 0 1.9Z"/></svg><span>Pengaturan</span></button>
     </div>
   </nav>
   <footer class="foot">Periksa kembali fakta produk sebelum dipublikasikan.</footer>
   <script src="./app.js"></script>
+  <script>document.getElementById("startNow")?.addEventListener("click",()=>document.getElementById("photo")?.click());document.getElementById("openSettingsHome")?.addEventListener("click",()=>document.getElementById("openSettings")?.click());</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
   <script src="./firebase-config.js"></script>
