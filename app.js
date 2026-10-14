@@ -450,6 +450,16 @@ function stopVideoPreview() {
   videoPreviewFrame = 0;
 }
 
+function getProductContext() {
+  return String($("#productContext")?.value || $("#facts")?.value || "").replace(/\s+/g, " ").trim();
+}
+
+function syncProductContext() {
+  const context = $("#productContext")?.value || "";
+  if ($("#facts")) $("#facts").value = context;
+  return context.trim();
+}
+
 function renderAll() {
   const canvas = bannerCard.querySelector("canvas");
   const format = $("#format").value;
@@ -459,7 +469,7 @@ function renderAll() {
   const hasAiPhoto = aiPhotos.some(Boolean);
   $("#downloadBanner").disabled = !hasAiPhoto;
   $("#downloadBanner").onclick = () => saveCanvas(canvas, `banner-${selectedStyle}.png`);
-  $("#generate").disabled = !hasAiPhoto;
+  $("#generate").disabled = !hasAiPhoto || !getProductContext();
   drawVideo();
 }
 
@@ -575,7 +585,13 @@ function selectAiPhoto(index) {
   $("#generate").textContent = "Buat SEO";
   renderAiPhotoGallery();
   renderAll();
-  $("#generate").click();
+  if (syncProductContext()) {
+    $("#generate").click();
+  } else {
+    $("#generate").hidden = false;
+    $("#generate").disabled = true;
+    $("#status").textContent = "Isi deskripsi atau contoh penggunaan produk di atas agar judul dan deskripsi lebih akurat.";
+  }
 }
 
 async function generateAiPhotos(file, runId) {
@@ -806,6 +822,15 @@ $("#checkServices").onclick = async () => {
   }
 };
 
+$("#productContext")?.addEventListener("input", () => {
+  const context = syncProductContext();
+  const hasAiPhoto = aiPhotos.some(Boolean);
+  $("#generate").disabled = !hasAiPhoto || !context;
+  if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
+    $("#status").textContent = "Deskripsi sudah siap. Tekan Buat SEO untuk melanjutkan.";
+  }
+});
+
 $("#format").onchange = renderAll;
 
 $("#generate").onclick = async () => {
@@ -828,7 +853,16 @@ $("#generate").onclick = async () => {
   try {
     const form = new FormData();
     form.append("photo", activeBlob, activeFileName || sourceFile?.name || "foto-produk.png");
-    form.append("extra", $("#facts").value);
+    const productContext = syncProductContext();
+    if (!productContext) {
+      button.disabled = true;
+      button.hidden = false;
+      $("#status").classList.remove("isLoading");
+      $("#status").textContent = "Deskripsi produk wajib diisi agar hasil CEO lebih akurat.";
+      seoRequestBusy = false;
+      return;
+    }
+    form.append("extra", productContext);
     const response = await fetch(apiUrl("/api/seo"), { method: "POST", body: form });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
