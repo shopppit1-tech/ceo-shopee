@@ -712,19 +712,19 @@ function selectAiPhoto(index) {
   $("#selectedPhotoLabel").textContent = AI_PHOTO_VARIANTS[index].title;
   resetGeneratedCopy();
   $("#bgBadge").textContent = `${AI_PHOTO_VARIANTS[index].title} dipilih`;
-  $("#status").textContent = "Nama produk tersimpan. Tekan Buat SEO untuk membuat konten CEO.";
+  $("#status").textContent = "Nama produk tersimpan. Tekan Buat CEO untuk membuat konten CEO.";
   $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
   $("#generateAiPhotosButton").hidden = true;
   $("#generateAiPhotosButton").disabled = true;
-  $("#generate").textContent = "Buat SEO";
+  $("#generate").textContent = "Buat CEO";
   renderAiPhotoGallery();
   renderAll();
   $("#generate").hidden = false;
   $("#generate").disabled = !getProductName() || !syncProductContext();
   $("#status").textContent = $("#generate").disabled
-    ? "Lengkapi nama dan deskripsi produk, lalu tekan Buat SEO."
-    : "Nama produk tersimpan. Tekan Buat SEO jika ingin membuat konten otomatis.";
+    ? "Lengkapi nama dan deskripsi produk, lalu tekan Buat CEO."
+    : "Nama produk tersimpan. Tekan Buat CEO jika ingin membuat konten otomatis.";
 }
 
 async function generateAiPhotos(file, runId) {
@@ -823,7 +823,7 @@ $("#photo").onchange = (event) => {
   $("#status").classList.remove("isLoading");
   $("#status").setAttribute("aria-busy", "false");
   $("#generate").hidden = true;
-  $("#generate").textContent = "Buat SEO";
+  $("#generate").textContent = "Buat CEO";
   sourceFile = file;
   activeSavedResultId = null;
   $("#backToPhotos").disabled = false;
@@ -841,7 +841,7 @@ $("#photo").onchange = (event) => {
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
     $("#status").textContent = "Foto diterima. Ketik nama produk sekali, lalu tekan Buat Foto dengan AI.";
-    $("#videoStatus").textContent = "Buat SEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
+    $("#videoStatus").textContent = "Buat CEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
     renderAiPhotoGallery();
@@ -989,7 +989,7 @@ const updateSeoReadiness = () => {
   if (hasAiPhoto && selectedVariantIndex !== null && !productData) $("#generate").hidden = false;
   $("#generate").disabled = !hasAiPhoto || !name || !context;
   if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
-    $("#status").textContent = "Nama produk siap. Tekan Buat SEO agar AI membuat konten otomatis.";
+    $("#status").textContent = "Nama produk siap. Tekan Buat CEO agar AI membuat konten otomatis.";
   }
 };
 const savedProductName = (() => { try { return localStorage.getItem(PRODUCT_NAME_KEY) || ""; } catch (_) { return ""; } })();
@@ -1055,7 +1055,7 @@ $("#generate").onclick = async () => {
       narration: makeVideoNarration(faithfulCopy.title, faithfulCopy.description),
     };
     button.hidden = true;
-    button.textContent = "Buat SEO";
+    button.textContent = "Buat CEO";
     const savedLocally = saveCurrentResult();
     $("#title").textContent = faithfulCopy.title;
     $("#description").textContent = faithfulCopy.description;
