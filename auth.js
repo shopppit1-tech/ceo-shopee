@@ -1,16 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import {
-  getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult,
-  onAuthStateChanged, signOut as firebaseSignOut, setPersistence, browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-
 (() => {
   const $ = (id) => document.getElementById(id);
   const authScreen = $("authScreen");
   const form = $("authForm");
   const message = $("authMsg");
   const submitButton = $("authSubmit");
-  const googleButton = $("authGoogle");
   const passwordInput = $("authPassword");
   const preferenceKey = "ceoShopeeAuthProvider.v1";
   let registerMode = false;
@@ -18,11 +11,8 @@ import {
   let initialized = false;
   let activeProvider = "";
   let activeIdentity = "";
-  let firebaseUser = null;
   let supabaseUser = null;
   let supabaseClient;
-  let firebaseAuth;
-  let googleProvider;
 
   const setMessage = (text, success = false) => {
     message.textContent = text;
@@ -41,15 +31,15 @@ import {
 
   const installSyncAdapter = () => {
     window.CEO_SYNC_ADAPTER = {
-      provider: activeProvider,
+      provider: "supabase",
       async load() {
-        if (activeProvider !== "supabase" || !supabaseClient) return null;
+        if (!supabaseClient) return null;
         const { data, error } = await supabaseClient.auth.getUser();
         if (error) throw error;
         return data.user?.user_metadata?.ceoShopeeSync || null;
       },
       async save(state) {
-        if (activeProvider !== "supabase" || !supabaseClient) return false;
+        if (!supabaseClient) return false;
         const { data, error } = await supabaseClient.auth.getUser();
         if (error) throw error;
         const metadata = { ...(data.user?.user_metadata || {}), ceoShopeeSync: state };
@@ -68,24 +58,21 @@ import {
     emitIdentity("");
   };
 
-  const showUser = (user, provider) => {
+  const showUser = (user) => {
     if (!user) return showLogin();
-    const identity = provider === "firebase" ? `firebase:${user.uid}` : `supabase:${user.id}`;
-    activeProvider = provider;
+    const identity = `supabase:${user.id}`;
+    activeProvider = "supabase";
     installSyncAdapter();
-    try { localStorage.setItem(preferenceKey, provider); } catch (_) {}
+    try { localStorage.setItem(preferenceKey, "supabase"); } catch (_) {}
     emitIdentity(identity);
-    installSyncAdapter();
     document.body.classList.remove("auth-locked");
     authScreen.hidden = true;
 
-    const email = user.email || "Akun Google";
-    const displayName = provider === "firebase"
-      ? (user.displayName || email.split("@")[0] || "Pengguna")
-      : (email.split("@")[0] || "Pengguna");
-    $("profileEmail").textContent = email;
-    $("profileName").textContent = displayName.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-    $("profileAvatar").textContent = (displayName[0] || "P").toUpperCase();
+    const email = user.email || "Pengguna";
+    const displayName = email.split("@")[0] || "Pengguna";
+    $("#profileEmail").textContent = email;
+    $("#profileName").textContent = displayName.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    $("#profileAvatar").textContent = (displayName[0] || "P").toUpperCase();
   };
 
   const supabaseError = (error) => {
@@ -99,66 +86,19 @@ import {
     return error?.message || "Tidak dapat menghubungi layanan login. Coba lagi.";
   };
 
-  const firebaseError = (error) => {
-    const messages = {
-      "auth/unauthorized-domain": "Domain situs belum diizinkan di Firebase Authentication.",
-      "auth/popup-closed-by-user": "Proses login Google dibatalkan.",
-      "auth/network-request-failed": "Koneksi internet bermasalah. Coba lagi.",
-      "auth/operation-not-allowed": "Login Google belum diaktifkan pada Firebase Authentication.",
-      "auth/invalid-api-key": "API key Firebase tidak valid.",
-      "auth/too-many-requests": "Terlalu banyak percobaan. Coba lagi nanti."
-    };
-    return messages[error?.code] || `Login Google gagal: ${error?.message || "Terjadi kesalahan."}`;
-  };
-
-  const otherSessionCleanup = async (provider) => {
-    if (provider === "firebase" && supabaseUser) {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) throw error;
-      supabaseUser = null;
-    } else if (provider === "supabase" && firebaseAuth.currentUser) {
-      await firebaseSignOut(firebaseAuth);
-      firebaseUser = null;
-    }
-  };
-
-  const chooseInitialIdentity = async (redirectUser = null) => {
-    const preferred = (() => { try { return localStorage.getItem(preferenceKey) || ""; } catch (_) { return ""; } })();
-    let provider = "";
-    let user = null;
-    if (preferred === "firebase" && (redirectUser || firebaseUser)) {
-      provider = "firebase"; user = redirectUser || firebaseUser;
-    } else if (preferred === "supabase" && supabaseUser) {
-      provider = "supabase"; user = supabaseUser;
-    } else if (redirectUser || firebaseUser) {
-      provider = "firebase"; user = redirectUser || firebaseUser;
-    } else if (supabaseUser) {
-      provider = "supabase"; user = supabaseUser;
-    }
-
-    if (!user) {
+  const chooseInitialIdentity = async () => {
+    if (!supabaseUser) {
       try { localStorage.removeItem(preferenceKey); } catch (_) {}
       showLogin();
       return;
     }
-    showUser(user, provider);
-    transitioning = true;
-    try { await otherSessionCleanup(provider); } catch (_) {}
-    transitioning = false;
+    showUser(supabaseUser);
   };
 
-  const onProviderChange = (provider, user) => {
+  const onProviderChange = (user) => {
     if (transitioning || !initialized) return;
-    if (user) {
-      if (!activeProvider || activeProvider === provider) showUser(user, provider);
-      return;
-    }
-    if (activeProvider === provider) {
-      const alternativeProvider = provider === "firebase" ? "supabase" : "firebase";
-      const alternativeUser = alternativeProvider === "firebase" ? firebaseUser : supabaseUser;
-      if (alternativeUser) showUser(alternativeUser, alternativeProvider);
-      else showLogin();
-    }
+    if (user) showUser(user);
+    else if (activeProvider === "supabase") showLogin();
   };
 
   $("authSwitch").addEventListener("click", () => {
@@ -178,7 +118,7 @@ import {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!supabaseClient) {
-      setMessage("Login email Supabase belum siap. Periksa koneksi internet.");
+      setMessage("Login email belum siap. Periksa koneksi internet.");
       return;
     }
     const email = $("authEmail").value.trim().toLowerCase();
@@ -203,8 +143,7 @@ import {
         if (error) throw error;
         if (data.session?.user) {
           supabaseUser = data.session.user;
-          await otherSessionCleanup("supabase");
-          showUser(supabaseUser, "supabase");
+          showUser(supabaseUser);
         } else {
           setMessage("Pendaftaran berhasil. Ikuti instruksi konfirmasi email jika diminta.", true);
         }
@@ -212,8 +151,7 @@ import {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         supabaseUser = data.user;
-        await otherSessionCleanup("supabase");
-        showUser(supabaseUser, "supabase");
+        showUser(supabaseUser);
       }
     } catch (error) {
       setMessage(supabaseError(error));
@@ -224,33 +162,9 @@ import {
     }
   });
 
-  googleButton.addEventListener("click", async () => {
-    if (!firebaseAuth || !googleProvider) {
-      setMessage("Login Google Firebase belum siap. Periksa konfigurasi Firebase.");
-      return;
-    }
-    googleButton.disabled = true;
-    googleButton.textContent = "Mengalihkan ke Google…";
-    setMessage("");
-    try {
-      try { localStorage.setItem(preferenceKey, "firebase"); } catch (_) {}
-      await signInWithRedirect(firebaseAuth, googleProvider);
-    } catch (error) {
-      try { localStorage.removeItem(preferenceKey); } catch (_) {}
-      setMessage(firebaseError(error));
-      googleButton.disabled = false;
-      googleButton.textContent = "🌐  Masuk dengan Google";
-    }
-  });
-
   $("editProfileButton").addEventListener("click", async () => {
-    if (activeProvider === "firebase" && firebaseAuth.currentUser) {
-      const user = firebaseAuth.currentUser;
-      window.alert(`Profil pengguna\nNama: ${user.displayName || "Pengguna"}\nEmail: ${user.email || "-"}\nMasuk dengan: Google (Firebase)`);
-    } else {
-      const { data } = await supabaseClient.auth.getUser();
-      window.alert("Profil pengguna\nEmail: " + (data.user?.email || "") + "\nMasuk dengan: Email (Supabase)");
-    }
+    const { data } = await supabaseClient.auth.getUser();
+    window.alert("Profil pengguna\nEmail: " + (data.user?.email || "") + "\nMasuk dengan: Email");
   });
 
   $("privacyInfoButton").addEventListener("click", () => window.alert(
@@ -263,15 +177,9 @@ import {
     button.disabled = true;
     transitioning = true;
     try {
-      const results = await Promise.allSettled([
-        supabaseClient.auth.signOut(),
-        firebaseAuth.currentUser ? firebaseSignOut(firebaseAuth) : Promise.resolve()
-      ]);
-      const supabaseFailure = results[0].status === "rejected" || results[0].value?.error;
-      const firebaseFailure = results[1].status === "rejected";
-      if (supabaseFailure || firebaseFailure) throw new Error("Tidak dapat mengeluarkan akun. Coba lagi.");
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
       supabaseUser = null;
-      firebaseUser = null;
       activeProvider = "";
       try { localStorage.removeItem(preferenceKey); } catch (_) {}
       const dialog = $("settingsDialog");
@@ -288,15 +196,9 @@ import {
   });
 
   const supabaseConfig = window.CEO_SUPABASE_CONFIG;
-  const firebaseConfig = window.CEO_FIREBASE_CONFIG;
   if (!window.supabase?.createClient || !supabaseConfig?.url || !supabaseConfig?.publishableKey) {
     showLogin();
-    setMessage("Konfigurasi login email Supabase belum tersedia.");
-    return;
-  }
-  if (!firebaseConfig?.apiKey || !firebaseConfig?.projectId || !firebaseConfig?.authDomain) {
-    showLogin();
-    setMessage("Konfigurasi login Google Firebase belum tersedia.");
+    setMessage("Konfigurasi login email belum tersedia.");
     return;
   }
 
@@ -304,55 +206,23 @@ import {
     supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
-    const firebaseApp = initializeApp(firebaseConfig);
-    firebaseAuth = getAuth(firebaseApp);
-    googleProvider = new GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: "select_account" });
     window.CEO_SYNC_ADAPTER = null;
-  } catch (error) {
+  } catch (_) {
     showLogin();
-    setMessage("Layanan login gagal dimulai. Muat ulang aplikasi dan coba lagi.");
+    setMessage("Layanan login email gagal dimulai. Muat ulang aplikasi dan coba lagi.");
     return;
   }
 
-  Promise.resolve(setPersistence(firebaseAuth, browserLocalPersistence)).then(async () => {
-    let resolveInitialFirebase;
-    const initialFirebaseState = new Promise((resolve) => { resolveInitialFirebase = resolve; });
-    let firstFirebaseState = true;
-    onAuthStateChanged(firebaseAuth, (user) => {
-      firebaseUser = user;
-      if (firstFirebaseState) {
-        firstFirebaseState = false;
-        resolveInitialFirebase(user);
-      } else onProviderChange("firebase", user);
-    }, () => {
-      if (firstFirebaseState) {
-        firstFirebaseState = false;
-        resolveInitialFirebase(null);
-      }
-    });
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    supabaseUser = session?.user || null;
+    onProviderChange(supabaseUser);
+  });
 
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
-      supabaseUser = session?.user || null;
-      onProviderChange("supabase", supabaseUser);
-    });
-
-    let redirectUser = null;
-    const redirectResultPromise = getRedirectResult(firebaseAuth).then((result) => {
-      redirectUser = result?.user || null;
-    }).catch((error) => {
-      setMessage(firebaseError(error));
-    });
-
-    const [{ data, error }] = await Promise.all([
-      supabaseClient.auth.getSession(),
-      initialFirebaseState,
-      redirectResultPromise
-    ]);
+  supabaseClient.auth.getSession().then(async ({ data, error }) => {
     if (error) throw error;
-    supabaseUser = data.session?.user || supabaseUser;
+    supabaseUser = data.session?.user || null;
     initialized = true;
-    await chooseInitialIdentity(redirectUser);
+    await chooseInitialIdentity();
   }).catch(() => {
     initialized = true;
     showLogin();
