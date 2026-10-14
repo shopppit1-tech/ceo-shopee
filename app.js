@@ -968,6 +968,7 @@ const updateSeoReadiness = () => {
   const context = syncProductContext();
   const name = getProductName();
   const hasAiPhoto = aiPhotos.some(Boolean);
+  if (hasAiPhoto && selectedVariantIndex !== null && !productData) $("#generate").hidden = false;
   $("#generate").disabled = !hasAiPhoto || !name || !context;
   if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
     $("#status").textContent = "Deskripsi sudah siap. Tekan Buat SEO untuk melanjutkan.";
