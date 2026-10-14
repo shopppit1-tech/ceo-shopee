@@ -1,6 +1,6 @@
-const CACHE_NAME = "foto-seo-shopee-pages-v6";
+const CACHE_NAME = "foto-seo-shopee-pages-v7";
 const APP_BASE = new URL("./", self.registration.scope);
-const APP_SHELL = ["", "manifest.json", "app.js", "auth.js", "supabase-config.js", "icons/ceo-shopee-192.png", "icons/ceo-shopee-512.png"].map((path) => new URL(path, APP_BASE).href);
+const APP_SHELL = ["", "manifest.json", "app.js", "auth.js", "supabase-config.js", "firebase-config.js", "icons/ceo-shopee-192.png", "icons/ceo-shopee-512.png"].map((path) => new URL(path, APP_BASE).href);
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
