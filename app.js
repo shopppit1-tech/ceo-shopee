@@ -515,6 +515,17 @@ function syncProductContext() {
   return context.trim();
 }
 
+function buildSeoContext(productContext) {
+  return [
+    "INSTRUKSI AKURASI WAJIB:",
+    "Gunakan deskripsi pemilik di bawah sebagai sumber kebenaran utama tentang NAMA dan JENIS PRODUK.",
+    "Foto bisa menampilkan kantong, botol, kotak, label, atau kemasan; jangan menjadikan kemasan sebagai nama produk.",
+    "Jangan mengganti produk dengan benda kemasan. Jika deskripsi menyebut terong kering, maka judul dan deskripsi WAJIB membahas terong kering; kantong hanya boleh disebut sebagai kemasan bila terlihat.",
+    "Jangan mengarang jenis produk, bahan, manfaat, ukuran, atau klaim yang tidak didukung deskripsi pemilik atau foto.",
+    `DESKRIPSI PEMILIK: ${productContext}`,
+  ].join("\n");
+}
+
 function renderAll() {
   const canvas = bannerCard.querySelector("canvas");
   const format = $("#format").value;
@@ -917,7 +928,8 @@ $("#generate").onclick = async () => {
       seoRequestBusy = false;
       return;
     }
-    form.append("extra", productContext);
+    form.append("extra", buildSeoContext(productContext));
+    form.append("product_context", productContext);
     const response = await fetch(apiUrl("/api/seo"), { method: "POST", body: form });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
