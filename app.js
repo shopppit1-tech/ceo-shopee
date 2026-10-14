@@ -702,13 +702,11 @@ function selectAiPhoto(index) {
   $("#generate").textContent = "Buat SEO";
   renderAiPhotoGallery();
   renderAll();
-  if (syncProductContext()) {
-    $("#generate").click();
-  } else {
-    $("#generate").hidden = false;
-    $("#generate").disabled = true;
-    $("#status").textContent = "Isi deskripsi atau contoh penggunaan produk di atas agar judul dan deskripsi lebih akurat.";
-  }
+  $("#generate").hidden = false;
+  $("#generate").disabled = !getProductName() || !syncProductContext();
+  $("#status").textContent = $("#generate").disabled
+    ? "Lengkapi nama dan deskripsi produk, lalu tekan Buat SEO."
+    : "Foto dipilih. Tekan Buat SEO jika ingin membuat judul dan deskripsi.";
 }
 
 async function generateAiPhotos(file, runId) {
@@ -830,7 +828,7 @@ $("#photo").onchange = (event) => {
     showScreen(2);
     renderAiPhotoGallery();
     renderAll();
-    generateAiPhotos(file, runId);
+    $("#generateAiPhotosButton").disabled = false;
   };
   nextImage.onerror = () => {
     if (runId !== uploadGeneration) return;
@@ -859,6 +857,15 @@ photoDropZone.addEventListener("drop", (event) => {
   $("#photo").dispatchEvent(new Event("change", { bubbles: true }));
 });
 
+$("#generateAiPhotosButton").onclick = async () => {
+  if (!sourceFile || seoRequestBusy) return;
+  const button = $("#generateAiPhotosButton");
+  button.disabled = true;
+  button.textContent = "Membuat foto AI…";
+  await generateAiPhotos(sourceFile, uploadGeneration);
+  button.hidden = true;
+  button.textContent = "Buat 3 Foto dengan AI";
+};
 $("#retryAiEdits").onclick = async () => {
   if (!sourceFile) return;
   $("#retryAiEdits").disabled = true;
