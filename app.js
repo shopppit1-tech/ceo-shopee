@@ -34,6 +34,7 @@ let selectedTemplateStyle = "marketplace";
 let uploadGeneration = 0;
 let seoRequestBusy = false;
 let seoGeneration = 0;
+let autoCeoStartedRun = 0;
 let videoExportBusy = false;
 let activeVideoDownloadUrl = null;
 let videoPreviewFrame = 0;
@@ -699,6 +700,18 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
+function autoGenerateCeoIfReady(runId = uploadGeneration) {
+  if (autoCeoStartedRun === runId || seoRequestBusy || productData || !getProductName()) return;
+  const index = aiPhotos.findIndex(Boolean);
+  if (index < 0) return;
+  autoCeoStartedRun = runId;
+  if (selectedVariantIndex !== index) selectAiPhoto(index);
+  $("#status").textContent = "Foto siap. AI sedang membuat CEO otomatis…";
+  setTimeout(() => {
+    if (runId === uploadGeneration && !seoRequestBusy && !productData) $("#generate").click();
+  }, 0);
+}
+
 function selectAiPhoto(index) {
   if (seoRequestBusy) return;
   const photo = aiPhotos[index];
@@ -785,12 +798,14 @@ async function generateAiPhotos(file, runId) {
   $("#editStatus").classList.remove("isLoading");
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
-    $("#editStatus").textContent = "Foto AI siap. Pilih foto ini untuk banner, SEO, dan video.";
+    $("#editStatus").textContent = "Foto AI siap. AI akan membuat CEO otomatis.";
     $("#retryAiEdits").hidden = true;
+    autoGenerateCeoIfReady(runId);
   } else if (readyCount > 0) {
-    $("#editStatus").textContent = `Foto AI berhasil dibuat. Anda tetap bisa memakai foto yang berhasil.`;
+    $("#editStatus").textContent = `Foto AI berhasil dibuat. AI akan memakai foto yang berhasil.`;
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
+    autoGenerateCeoIfReady(runId);
   } else {
     $("#editStatus").textContent = aiPhotoErrors.find(Boolean) || "Foto AI gagal dibuat. Periksa koneksi atau kuota gratis harian Cloudflare.";
     $("#retryAiEdits").hidden = false;
@@ -812,6 +827,7 @@ $("#photo").onchange = (event) => {
     return;
   }
   const runId = ++uploadGeneration;
+  autoCeoStartedRun = 0;
   if (imageUrl) URL.revokeObjectURL(imageUrl);
   aiPhotoUrls.forEach((url) => url && URL.revokeObjectURL(url));
   aiPhotoUrls = [];
