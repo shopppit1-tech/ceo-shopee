@@ -64,6 +64,7 @@ import {
     document.body.classList.add("auth-locked");
     authScreen.hidden = false;
     activeProvider = "";
+    window.CEO_SYNC_ADAPTER = null;
     emitIdentity("");
   };
 

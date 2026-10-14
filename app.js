@@ -255,6 +255,7 @@ window.addEventListener("ceo-auth-user-changed", (event) => {
     $("#changePhoto").click();
   }
   renderSavedCollections();
+  cloudSyncLoad();
 });
 
 function deleteSavedResult(id) {
