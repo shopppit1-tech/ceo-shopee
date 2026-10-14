@@ -687,7 +687,9 @@ function autoGenerateCeoIfReady(runId = uploadGeneration) {
   if (selectedVariantIndex !== index) selectAiPhoto(index);
   $("#status").textContent = "Foto siap. AI sedang membuat CEO otomatis…";
   setTimeout(() => {
-    if (runId === uploadGeneration && !seoRequestBusy && !productData) $("#generate").click();
+    if (runId !== uploadGeneration || seoRequestBusy || productData) return;
+    const action = $("#generate").onclick;
+    if (typeof action === "function") action.call($("#generate"));
   }, 0);
 }
 
@@ -1101,7 +1103,9 @@ function autoGenerateVideo(runId = uploadGeneration) {
   videoStatus.setAttribute("aria-busy", "true");
   videoStatus.textContent = "CEO selesai. Video Shorts sedang dibuat otomatis…";
   setTimeout(() => {
-    if (runId === uploadGeneration && productData?.narration) videoButton.click();
+    if (runId !== uploadGeneration || !productData?.narration) return;
+    const action = videoButton.onclick;
+    if (typeof action === "function") action.call(videoButton);
   }, 100);
 }
 
