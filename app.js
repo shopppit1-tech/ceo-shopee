@@ -1008,7 +1008,7 @@ const updateSeoReadiness = () => {
   const context = syncProductContext();
   const name = getProductName();
   const hasAiPhoto = aiPhotos.some(Boolean);
-  if (hasAiPhoto && selectedVariantIndex !== null && !productData) $("#generate").hidden = false;
+  if (hasAiPhoto && selectedVariantIndex !== null && !productData) $("#generate").hidden = true;
   $("#generate").disabled = !hasAiPhoto || !name || !context;
   if (context && selectedVariantIndex !== null && $("#generate").hidden === false && !seoRequestBusy) {
     $("#status").textContent = "Nama produk siap. Tekan Buat CEO agar AI membuat konten otomatis.";
@@ -1019,6 +1019,8 @@ if ($("#productName") && savedProductName) $("#productName").value = savedProduc
 $("#productName")?.addEventListener("input", () => {
   try { localStorage.setItem(PRODUCT_NAME_KEY, $("#productName").value.trim()); } catch (_) {}
   updateSeoReadiness();
+  $("#generateAiPhotosButton").disabled = !sourceFile || !getProductName();
+  $("#generateAiPhotosButton").hidden = false;
 });
 
 $("#format").onchange = renderAll;
