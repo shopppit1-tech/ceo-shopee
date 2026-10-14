@@ -245,7 +245,16 @@
 
     <section class="screen" id="screen3" hidden>
       <h1 class="screenTitle">Hasil siap</h1>
-      <p class="screenIntro">Unduh banner, salin teks, atau buat video Shorts bersuara.</p>
+      <p class="screenIntro">Video otomatis siap di bagian atas.</p>
+      <div class="panel">
+        <h2 style="font-size:17px;margin:0 0 8px">Video promosi + suara AI</h2>
+        <p class="videoHelp">Video otomatis dengan suara AI.</p>
+        <div class="videoBox"><canvas id="videoCanvas" width="720" height="1280"></canvas></div>
+        <div class="screenActions"><button class="btn primary full" id="downloadVideo" type="button" disabled aria-busy="false"><span class="videoSpinner" id="videoLoadingSpinner" aria-hidden="true" hidden></span><span id="downloadVideoLabel">Buat & unduh video MP4</span></button></div>
+        <div class="screenActions" id="videoDownloadActions" hidden><a class="btn outline full videoDownloadLink" id="videoDownloadLink" href="#" download="video-shorts-dengan-narasi-ai.mp4" hidden>Unduh MP4</a></div>
+        <div class="status" id="videoStatus" role="status" aria-live="polite">Sedang diproses…</div>
+      </div>
+
       <div class="panel resultTop"><img id="selectedPhotoPreview" alt="Foto AI terpilih"><div><strong id="selectedPhotoLabel">Foto AI terpilih</strong><small>Dipakai untuk banner, SEO, dan video</small></div></div>
 
       <div class="panel">
@@ -272,14 +281,6 @@
         <div class="screenActions"><button class="btn outline full" id="copyAll" type="button">Salin judul dan deskripsi</button></div>
       </div>
 
-      <div class="panel">
-        <h2 style="font-size:17px;margin:0 0 8px">Video promosi + suara AI</h2>
-        <p class="videoHelp">Video otomatis dengan suara AI.</p>
-        <div class="videoBox"><canvas id="videoCanvas" width="720" height="1280"></canvas></div>
-        <div class="screenActions"><button class="btn primary full" id="downloadVideo" type="button" disabled aria-busy="false"><span class="videoSpinner" id="videoLoadingSpinner" aria-hidden="true" hidden></span><span id="downloadVideoLabel">Buat & unduh video MP4</span></button></div>
-        <div class="screenActions" id="videoDownloadActions" hidden><a class="btn outline full videoDownloadLink" id="videoDownloadLink" href="#" download="video-shorts-dengan-narasi-ai.mp4" hidden>Unduh MP4</a></div>
-        <div class="status" id="videoStatus" role="status" aria-live="polite">Sedang diproses…</div>
-      </div>
       <div class="screenActions"><button class="btn outline" id="backToPhotos" type="button">Pilih foto AI lain</button><button class="btn outline" id="changePhoto" type="button">Produk baru</button></div>
     </section>
 
