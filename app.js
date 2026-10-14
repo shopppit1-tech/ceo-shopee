@@ -349,10 +349,17 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
   lines.slice(0, maxLines).forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
 }
 
-function drawBanner(canvas, style) {
+function drawBanner(canvas, style, template = selectedTemplateStyle) {
   const ctx = canvas.getContext("2d");
   const { width, height } = canvas;
   const [background, accent, ink] = palettes[style] || palettes.promo;
+  const layouts = {
+    marketplace: { imageY: 0.35, imageH: 0.54, badge: "PRODUK PILIHAN" },
+    story: { imageY: 0.29, imageH: 0.60, badge: "CERITA PRODUK" },
+    catalog: { imageY: 0.39, imageH: 0.46, badge: "KATALOG" },
+    premium: { imageY: 0.32, imageH: 0.55, badge: "PREMIUM LOOK" },
+  };
+  const layout = layouts[template] || layouts.marketplace;
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, width, height);
   const gradient = ctx.createLinearGradient(0, 0, width, height);
@@ -377,9 +384,9 @@ function drawBanner(canvas, style) {
   if (image) {
     ctx.save();
     ctx.beginPath();
-    ctx.roundRect(width * 0.07, height * 0.35, width * 0.86, height * 0.54, 25);
+    ctx.roundRect(width * 0.07, height * layout.imageY, width * 0.86, height * layout.imageH, 25);
     ctx.clip();
-    drawCover(ctx, image, width * 0.07, height * 0.35, width * 0.86, height * 0.54);
+    drawCover(ctx, image, width * 0.07, height * layout.imageY, width * 0.86, height * layout.imageH);
     ctx.restore();
   }
   if (style === "promo") {
@@ -389,8 +396,8 @@ function drawBanner(canvas, style) {
     ctx.fill();
     ctx.fillStyle = "#fff";
     ctx.font = "900 19px system-ui";
-    ctx.fillText("PRODUK", width * 0.79, height * 0.79);
-    ctx.fillText("PILIHAN", width * 0.79, height * 0.83);
+    ctx.fillText(layout.badge.split(" ")[0], width * 0.79, height * 0.79);
+    ctx.fillText(layout.badge.split(" ").slice(1).join(" ") || "", width * 0.79, height * 0.83);
   }
   ctx.fillStyle = ink;
   ctx.font = "800 22px system-ui";
@@ -537,12 +544,17 @@ function renderAiTemplates() {
   const name = getProductName() || productData?.headline || "Produk Pilihan";
   const description = productData?.description || getProductContext() || "Konten promosi produk siap digunakan.";
   const short = description.length > 85 ? `${description.slice(0, 82).replace(/\s+\S*$/, "")}…` : description;
-  const templateMap = { marketplace: ["Marketplace", "Harga & keunggulan"], story: ["Story Promo", "Format vertikal 9:16"], catalog: ["Katalog", "Gaya katalog rapi"], premium: ["Premium Look", "Tampilan berkelas"] };
-  const selected = templateMap[selectedTemplateStyle] || templateMap.marketplace;
-  const templates = [selected, ["Promo Unggulan", "Diskon & manfaat utama"], ["Natural Fresh", "Cocok untuk katalog"], ["Premium Minimal", "Tampilan elegan"]];
-  gallery.replaceChildren(...templates.map(([label, hint]) => {
-    const card = document.createElement("article");
-    card.className = "templateCard";
+  const templates = [
+    ["marketplace", "Marketplace", "Harga & keunggulan"],
+    ["story", "Story Promo", "Format vertikal 9:16"],
+    ["catalog", "Katalog", "Gaya katalog rapi"],
+    ["premium", "Premium Look", "Tampilan berkelas"],
+  ];
+  gallery.replaceChildren(...templates.map(([key, label, hint]) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = `templateCard${selectedTemplateStyle === key ? " selected" : ""}`;
+    card.setAttribute("aria-pressed", String(selectedTemplateStyle === key));
     const visual = document.createElement("div");
     visual.className = "templateVisual";
     const title = document.createElement("strong");
@@ -557,6 +569,11 @@ function renderAiTemplates() {
     metaHint.textContent = hint;
     meta.append(metaHint);
     card.append(visual, meta);
+    card.addEventListener("click", () => {
+      selectedTemplateStyle = key;
+      renderAll();
+      $("#videoStatus").textContent = `Template ${label} dipilih. Banner diperbarui.`;
+    });
     return card;
   }));
 }
@@ -578,7 +595,7 @@ function renderAll() {
   const canvas = bannerCard.querySelector("canvas");
   const format = $("#format").value;
   [canvas.width, canvas.height] = format === "landscape" ? [1200, 675] : format === "portrait" ? [800, 1000] : [900, 900];
-  drawBanner(canvas, selectedStyle);
+  drawBanner(canvas, selectedStyle, selectedTemplateStyle);
   bannerCard.querySelector("strong").textContent = `Satu Banner · ${names[selectedStyle]}`;
   const hasAiPhoto = aiPhotos.some(Boolean);
   renderAiTemplates();
