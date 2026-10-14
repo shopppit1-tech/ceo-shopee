@@ -4,10 +4,8 @@
   const form = $("authForm");
   const message = $("authMsg");
   const submitButton = $("authSubmit");
-  const guestButton = $("guestAccess");
   const passwordInput = $("authPassword");
   const preferenceKey = "ceoShopeeAuthProvider.v1";
-  const guestKey = "ceoShopeeGuestMode.v1";
   let registerMode = false;
   let transitioning = false;
   let initialized = false;
@@ -58,24 +56,11 @@
     emitIdentity("");
   };
 
-  const showGuest = () => {
-    activeProvider = "guest";
-    installSyncAdapter();
-    const identity = "guest:local";
-    try { localStorage.setItem(guestKey, "1"); } catch (_) {}
-    emitIdentity(identity);
-    document.body.classList.remove("auth-locked");
-    authScreen.hidden = true;
-    $("#profileEmail").textContent = "Mode tamu · tersimpan di perangkat";
-    $("#profileName").textContent = "Pengguna";
-    $("#profileAvatar").textContent = "P";
-  };
-
   const showUser = (user) => {
     if (!user) return showLogin();
     activeProvider = "supabase";
     installSyncAdapter();
-    try { localStorage.setItem(preferenceKey, "supabase"); localStorage.removeItem(guestKey); } catch (_) {}
+    try { localStorage.setItem(preferenceKey, "supabase"); } catch (_) {}
     emitIdentity(`supabase:${user.id}`);
     document.body.classList.remove("auth-locked");
     authScreen.hidden = true;
@@ -88,26 +73,23 @@
 
   const supabaseError = (error) => {
     const text = (error?.message || "").toLowerCase();
-    if (text.includes("invalid login credentials")) return "Email atau kata sandi salah. Gunakan Mode Tamu atau Daftar sekarang.";
-    if (text.includes("email not confirmed")) return "Email belum dikonfirmasi. Periksa inbox atau gunakan Mode Tamu.";
+    if (text.includes("invalid login credentials")) return "Email atau kata sandi salah. Daftar sekarang.";
+    if (text.includes("email not confirmed")) return "Email belum dikonfirmasi. Periksa inbox.";
     if (text.includes("user already registered")) return "Email sudah terdaftar. Silakan masuk.";
     if (text.includes("signup is disabled")) return "Pendaftaran akun sedang dinonaktifkan. Gunakan Mode Tamu.";
     if (text.includes("password")) return "Kata sandi minimal 6 karakter.";
     if (text.includes("email")) return "Periksa alamat email yang dimasukkan.";
-    return error?.message || "Login gagal. Gunakan Mode Tamu atau coba lagi.";
+    return error?.message || "Login gagal. coba lagi.";
   };
 
   const chooseInitialIdentity = async () => {
-    let guest = false;
-    try { guest = localStorage.getItem(guestKey) === "1"; } catch (_) {}
-    if (guest) return showGuest();
     if (supabaseUser) return showUser(supabaseUser);
     try { localStorage.removeItem(preferenceKey); } catch (_) {}
     showLogin();
   };
 
   const onProviderChange = (user) => {
-    if (transitioning || !initialized || activeProvider === "guest") return;
+    if (transitioning || !initialized || false) return;
     if (user) showUser(user);
     else if (activeProvider === "supabase") showLogin();
   };
@@ -124,14 +106,9 @@
     setMessage("");
   });
 
-  guestButton.addEventListener("click", () => {
-    setMessage("Membuka CEO Shopee…", true);
-    showGuest();
-  });
-
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!supabaseClient) return setMessage("Login email belum siap. Gunakan Mode Tamu.");
+    if (!supabaseClient) return setMessage("Login email belum siap. Periksa koneksi internet.");
     const email = $("authEmail").value.trim().toLowerCase();
     const password = passwordInput.value;
     if (!email || password.length < 6) return setMessage("Masukkan email yang valid dan kata sandi minimal 6 karakter.");
@@ -161,7 +138,7 @@
   });
 
   $("editProfileButton").addEventListener("click", async () => {
-    if (activeProvider === "guest") return window.alert("Profil pengguna\nMode tamu\nData tersimpan di perangkat ini.");
+    if (false) return window.alert("Profil pengguna\nMode tamu\nData tersimpan di perangkat ini.");
     const { data } = await supabaseClient.auth.getUser();
     window.alert("Profil pengguna\nEmail: " + (data.user?.email || "") + "\nMasuk dengan: Email");
   });
@@ -179,7 +156,7 @@
       }
       supabaseUser = null;
       activeProvider = "";
-      try { localStorage.removeItem(preferenceKey); localStorage.removeItem(guestKey); } catch (_) {}
+      try { localStorage.removeItem(preferenceKey); } catch (_) {}
       const dialog = $("settingsDialog");
       if (dialog?.open) dialog.close();
       passwordInput.value = "";
@@ -195,14 +172,14 @@
   const supabaseConfig = window.CEO_SUPABASE_CONFIG;
   if (!window.supabase?.createClient || !supabaseConfig?.url || !supabaseConfig?.publishableKey) {
     showLogin();
-    setMessage("Login email belum tersedia. Gunakan Mode Tamu.");
+    setMessage("Konfigurasi login email belum tersedia.");
     return;
   }
   try {
     supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   } catch (_) {
     showLogin();
-    setMessage("Layanan login gagal dimulai. Gunakan Mode Tamu.");
+    setMessage("Layanan login email gagal dimulai. Muat ulang aplikasi dan coba lagi.");
     return;
   }
   supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -217,6 +194,6 @@
   }).catch(() => {
     initialized = true;
     showLogin();
-    setMessage("Login email belum siap. Gunakan Mode Tamu atau coba lagi.");
+    setMessage("Login email belum siap. coba lagi.");
   });
 })();
