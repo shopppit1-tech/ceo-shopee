@@ -217,7 +217,7 @@
         </div>
       </section>
       <div class="panel homeCreatePanel referenceCreatePanel">
-        <div class="homePanelTitle"><div><strong>Mulai dari foto produk</strong><small>Unggah foto, lalu isi nama dan deskripsi di langkah berikutnya.</small></div></div>
+        <div class="homePanelTitle"><div><strong>Mulai dari foto produk</strong><small>Unggah foto, lalu ketik nama produk agar AI menyiapkan konten CEO.</small></div></div>
         <div class="homeUploadHeading"><div><strong>Foto produk</strong><small>Pilih foto asli dari galeri perangkat.</small></div><span>JPG · PNG · WEBP</span></div>
         <label class="upload" for="photo"><img id="photoPreview" hidden alt="Foto produk asli"><span class="homeUploadGraphic" aria-hidden="true"><span>▧</span><i>+</i></span><b class="uploadTitle" id="uploadTitle">Unggah foto produk</b><small class="uploadHint" id="bgBadge">Foto jelas · maksimal 10 MB</small><span class="btn primary homeChoosePhoto">＋ &nbsp; Pilih dari galeri</span></label>
         <input id="photo" type="file" accept="image/jpeg,image/png,image/webp"><div class="status error" id="uploadError" role="status" aria-live="polite"></div><p class="homePrivacyNote"><span>✓</span> Pastikan detail produk benar sebelum dipublikasikan.</p><p class="note"></p>
@@ -225,14 +225,12 @@
     </section>
     <section class="screen" id="screen2" hidden>
       <h1 class="screenTitle">Siapkan produk</h1>
-      <p class="screenIntro">Isi nama dan deskripsi produk, lalu tekan tombol yang tersedia. Tidak ada proses AI yang berjalan tanpa perintah Anda.</p>
+      <p class="screenIntro">Ketik nama produk, lalu tekan tombol yang tersedia. AI akan membuat deskripsi secara otomatis setelah Anda memberi perintah.</p>
       <div class="panel contextPanel">
-        <div class="contextHeading"><span class="contextBadge">✦</span><div><strong>Bantu CEO memahami produkmu</strong><small>Isi deskripsi atau contoh penggunaan agar judul dan deskripsi lebih akurat.</small></div></div>
+        <div class="contextHeading"><span class="contextBadge">✦</span><div><strong>Nama produk untuk CEO</strong><small>AI akan membuat judul, deskripsi, kata kunci, dan narasi dari nama produk serta foto yang Anda pilih.</small></div></div>
         <label class="contextLabel" for="productName">Nama produk (wajib, jangan tulis nama kemasan)</label>
         <input id="productName" class="contextInput contextNameInput" type="text" autocomplete="off" placeholder="Contoh: Terong Kering Pedas 100 gram">
-        <label class="contextLabel" for="productContext">Deskripsi produk / contoh penggunaan</label>
-        <textarea id="productContext" class="contextInput" rows="4" placeholder="Contoh: Terong kering pedas 100 gram, renyah, cocok untuk lauk dan camilan. Foto menampilkan produk di dalam kantong standing pouch."></textarea>
-        <p class="contextHint">Sebutkan nama produk, bahan, ukuran, warna, manfaat, target pembeli, atau suasana foto yang diinginkan.</p>
+        <p class="contextHint" style="margin-top:15px">Nama produk harus spesifik, misalnya: Terong Kering Pedas 100 gram.</p>
       </div>
       <div class="panel">
         <div class="aiPhotoGrid" id="aiPhotoGallery"></div>
