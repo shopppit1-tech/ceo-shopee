@@ -519,7 +519,7 @@ function getProductName() {
   return String($("#productName")?.value || "").replace(/\s+/g, " ").trim();
 }
 
-function ensureProductNameInCopy(productName, title, description) {
+function ensureProductNameInCopy(productName, title, description, fallbackContext) {
   const name = String(productName || "").trim();
   if (!name) return { title: String(title || ""), description: String(description || "") };
   const normalized = (value) => value.toLocaleLowerCase("id-ID").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
@@ -527,8 +527,8 @@ function ensureProductNameInCopy(productName, title, description) {
   const safeTitle = String(title || "").trim();
   const safeDescription = String(description || "").trim();
   return {
-    title: normalized(safeTitle).includes(key) ? safeTitle : `${name} | ${safeTitle}`,
-    description: normalized(safeDescription).includes(key) ? safeDescription : `${name}. ${safeDescription}`,
+    title: normalized(safeTitle).includes(key) ? safeTitle : name,
+    description: normalized(safeDescription).includes(key) ? safeDescription : `${name}. ${String(fallbackContext || "").trim()}`,
   };
 }
 
@@ -1000,13 +1000,13 @@ $("#generate").onclick = async () => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gagal membuat SEO.");
     if (requestId !== seoGeneration || runId !== uploadGeneration) return;
-    const faithfulCopy = ensureProductNameInCopy(productName, result.title, result.description);
+    const faithfulCopy = ensureProductNameInCopy(productName, result.title, result.description, productContext);
     productData = {
       title: faithfulCopy.title,
       description: faithfulCopy.description,
       headline: faithfulCopy.title || productName,
       keywords: [],
-      narration: makeVideoNarration(result.title, result.description),
+      narration: makeVideoNarration(faithfulCopy.title, faithfulCopy.description),
     };
     button.hidden = true;
     button.textContent = "Buat SEO";
@@ -1032,7 +1032,7 @@ $("#generate").onclick = async () => {
       seoRequestBusy = false;
       $("#status").classList.remove("isLoading");
       $("#status").setAttribute("aria-busy", "false");
-      button.disabled = !aiPhotos.some(Boolean);
+      button.disabled = !aiPhotos.some(Boolean) || !getProductName() || !getProductContext();
       renderAiPhotoGallery();
     }
   }
