@@ -73,13 +73,13 @@
 
   const supabaseError = (error) => {
     const text = (error?.message || "").toLowerCase();
-    if (text.includes("invalid login credentials")) return "Email atau kata sandi salah. Daftar sekarang.";
+    if (text.includes("invalid login credentials")) return "Email atau kata sandi salah.";
     if (text.includes("email not confirmed")) return "Email belum dikonfirmasi. Periksa inbox.";
     if (text.includes("user already registered")) return "Email sudah terdaftar. Silakan masuk.";
-    if (text.includes("signup is disabled")) return "Pendaftaran akun sedang dinonaktifkan. Gunakan Mode Tamu.";
+    if (text.includes("signup is disabled")) return "Pendaftaran akun sedang dinonaktifkan.";
     if (text.includes("password")) return "Kata sandi minimal 6 karakter.";
     if (text.includes("email")) return "Periksa alamat email yang dimasukkan.";
-    return error?.message || "Login gagal. coba lagi.";
+    return error?.message || "Login gagal. Coba lagi.";
   };
 
   const chooseInitialIdentity = async () => {
@@ -89,7 +89,7 @@
   };
 
   const onProviderChange = (user) => {
-    if (transitioning || !initialized || false) return;
+    if (transitioning || !initialized) return;
     if (user) showUser(user);
     else if (activeProvider === "supabase") showLogin();
   };
@@ -138,7 +138,6 @@
   });
 
   $("editProfileButton").addEventListener("click", async () => {
-    if (false) return window.alert("Profil pengguna\nMode tamu\nData tersimpan di perangkat ini.");
     const { data } = await supabaseClient.auth.getUser();
     window.alert("Profil pengguna\nEmail: " + (data.user?.email || "") + "\nMasuk dengan: Email");
   });
