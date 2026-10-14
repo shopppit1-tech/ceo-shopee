@@ -22,9 +22,7 @@ let activeFileName = "";
 let productData = null;
 let activeStep = 1;
 const AI_PHOTO_VARIANTS = [
-  { key: "studio", title: "Foto AI 1 · Studio Profesional", description: "Cahaya softbox, warna akurat, komposisi katalog" },
-  { key: "lifestyle", title: "Foto AI 2 · Lifestyle Natural", description: "Suasana relevan, cahaya alami, dekor minimal" },
-  { key: "contrast", title: "Foto AI 3 · Editorial Modern", description: "Rim light terarah, aksen kontras, framing premium" },
+  { key: "studio", title: "Foto AI · Studio Profesional", description: "Cahaya softbox, warna akurat, komposisi katalog" },
 ];
 let aiPhotos = Array(AI_PHOTO_VARIANTS.length).fill(null);
 let aiPhotoErrors = Array(AI_PHOTO_VARIANTS.length).fill(null);
@@ -699,8 +697,8 @@ function selectAiPhoto(index) {
   $("#status").textContent = "Membuat SEO dari foto pilihan…";
   $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
-  $("#generateAiPhotosButton").hidden = false;
-  $("#generateAiPhotosButton").disabled = false;
+  $("#generateAiPhotosButton").hidden = true;
+  $("#generateAiPhotosButton").disabled = true;
   $("#generate").textContent = "Buat SEO";
   renderAiPhotoGallery();
   renderAll();
@@ -715,7 +713,7 @@ async function generateAiPhotos(file, runId) {
   $("#retryAiEdits").hidden = true;
   $("#retryAiEdits").disabled = true;
   const total = AI_PHOTO_VARIANTS.length;
-  $("#editStatus").textContent = `Tekan tombol Buat 3 Foto dengan AI untuk menghasilkan ${total} pilihan foto.`;
+  $("#editStatus").textContent = `Tekan tombol Buat Foto dengan AI untuk menghasilkan satu foto.`;
   $("#editStatus").classList.add("isLoading");
   $("#editStatus").style.setProperty("--progress", "0%");
   let finished = 0;
@@ -769,10 +767,10 @@ async function generateAiPhotos(file, runId) {
   $("#editStatus").classList.remove("isLoading");
   const readyCount = aiPhotos.filter(Boolean).length;
   if (readyCount === total) {
-    $("#editStatus").textContent = "Tiga foto AI siap. Pilih salah satunya untuk banner, SEO, dan video.";
+    $("#editStatus").textContent = "Foto AI siap. Pilih foto ini untuk banner, SEO, dan video.";
     $("#retryAiEdits").hidden = true;
   } else if (readyCount > 0) {
-    $("#editStatus").textContent = `${readyCount} dari ${total} foto AI siap; ${total - readyCount} variasi gagal. Anda tetap bisa memakai foto yang berhasil.`;
+    $("#editStatus").textContent = `Foto AI berhasil dibuat. Anda tetap bisa memakai foto yang berhasil.`;
     $("#retryAiEdits").hidden = false;
     $("#retryAiEdits").disabled = false;
   } else {
@@ -824,7 +822,7 @@ $("#photo").onchange = (event) => {
     $("#photoPreview").hidden = false;
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
-    $("#status").textContent = "Foto diterima. Isi nama produk, lalu tekan Buat 3 Foto dengan AI jika diperlukan.";
+    $("#status").textContent = "Foto diterima. Isi nama produk, lalu tekan Buat Foto dengan AI jika diperlukan.";
     $("#videoStatus").textContent = "Buat SEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
@@ -866,7 +864,7 @@ $("#generateAiPhotosButton").onclick = async () => {
   button.textContent = "Membuat foto AI…";
   await generateAiPhotos(sourceFile, uploadGeneration);
   button.hidden = true;
-  button.textContent = "Buat 3 Foto dengan AI";
+  button.textContent = "Buat Foto dengan AI";
 };
 $("#retryAiEdits").onclick = async () => {
   if (!sourceFile) return;
