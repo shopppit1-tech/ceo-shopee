@@ -43,6 +43,8 @@ let videoPreviewLastPaint = 0;
 let activeMenu = "home";
 let previousMenu = "home";
 let activeSavedResultId = null;
+let cloudSyncBusy = false;
+let cloudSyncTimer = 0;
 
 const bannerCard = document.createElement("div");
 bannerCard.className = "bannerCard";
@@ -88,6 +90,56 @@ function readSavedResults() {
   }
 }
 
+function writeSavedResults(records) {
+  const storageKey = getSavedResultsKey();
+  if (!storageKey) return false;
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(records));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function mergeSavedResults(localRecords, cloudRecords) {
+  const merged = new Map();
+  [...(Array.isArray(localRecords) ? localRecords : []), ...(Array.isArray(cloudRecords) ? cloudRecords : [])].forEach((record) => {
+    if (record?.id && record?.productData) merged.set(record.id, record);
+  });
+  return [...merged.values()].sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || ""))).slice(0, 20);
+}
+
+async function cloudSyncSave() {
+  const adapter = window.CEO_SYNC_ADAPTER;
+  if (!adapter?.save || cloudSyncBusy || !getSavedResultsKey()) return;
+  cloudSyncBusy = true;
+  try {
+    await adapter.save({ version: 1, results: readSavedResults(), updatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.warn("Sinkronisasi cloud gagal:", error);
+  } finally {
+    cloudSyncBusy = false;
+  }
+}
+
+async function cloudSyncLoad() {
+  const adapter = window.CEO_SYNC_ADAPTER;
+  if (!adapter?.load || !getSavedResultsKey()) return;
+  try {
+    const cloud = await adapter.load();
+    const merged = mergeSavedResults(readSavedResults(), cloud?.results);
+    writeSavedResults(merged);
+    renderSavedCollections();
+  } catch (error) {
+    console.warn("Pemulihan sinkronisasi cloud gagal:", error);
+  }
+}
+
+function scheduleCloudSync() {
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(cloudSyncSave, 500);
+}
+
 function createResultThumbnail() {
   if (!image) return "";
   const thumbnail = document.createElement("canvas");
@@ -123,6 +175,7 @@ function saveCurrentResult() {
   try {
     const results = [result, ...readSavedResults().filter((item) => item.id !== result.id)].slice(0, 20);
     localStorage.setItem(storageKey, JSON.stringify(results));
+    scheduleCloudSync();
     activeSavedResultId = result.id;
     renderSavedCollections();
     return true;
@@ -209,6 +262,7 @@ function deleteSavedResult(id) {
   if (!storageKey) return;
   try {
     localStorage.setItem(storageKey, JSON.stringify(readSavedResults().filter((item) => item.id !== id)));
+    scheduleCloudSync();
   } catch {
     // The current view remains usable if browser storage is unavailable.
   }

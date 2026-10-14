@@ -33,9 +33,31 @@ import {
     if (activeIdentity === identity) return;
     activeIdentity = identity;
     window.CEO_AUTH_USER_ID = identity || null;
+    window.CEO_AUTH_PROVIDER = identity ? activeProvider : null;
     window.dispatchEvent(new CustomEvent("ceo-auth-user-changed", {
-      detail: { userId: identity || null }
+      detail: { userId: identity || null, provider: identity ? activeProvider : null }
     }));
+  };
+
+  const installSyncAdapter = () => {
+    window.CEO_SYNC_ADAPTER = {
+      provider: activeProvider,
+      async load() {
+        if (activeProvider !== "supabase" || !supabaseClient) return null;
+        const { data, error } = await supabaseClient.auth.getUser();
+        if (error) throw error;
+        return data.user?.user_metadata?.ceoShopeeSync || null;
+      },
+      async save(state) {
+        if (activeProvider !== "supabase" || !supabaseClient) return false;
+        const { data, error } = await supabaseClient.auth.getUser();
+        if (error) throw error;
+        const metadata = { ...(data.user?.user_metadata || {}), ceoShopeeSync: state };
+        const result = await supabaseClient.auth.updateUser({ data: metadata });
+        if (result.error) throw result.error;
+        return true;
+      }
+    };
   };
 
   const showLogin = () => {
@@ -49,8 +71,10 @@ import {
     if (!user) return showLogin();
     const identity = provider === "firebase" ? `firebase:${user.uid}` : `supabase:${user.id}`;
     activeProvider = provider;
+    installSyncAdapter();
     try { localStorage.setItem(preferenceKey, provider); } catch (_) {}
     emitIdentity(identity);
+    installSyncAdapter();
     document.body.classList.remove("auth-locked");
     authScreen.hidden = true;
 
@@ -283,6 +307,7 @@ import {
     firebaseAuth = getAuth(firebaseApp);
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: "select_account" });
+    window.CEO_SYNC_ADAPTER = null;
   } catch (error) {
     showLogin();
     setMessage("Layanan login gagal dimulai. Muat ulang aplikasi dan coba lagi.");
