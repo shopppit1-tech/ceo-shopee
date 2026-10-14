@@ -654,46 +654,20 @@ function resetGeneratedCopy() {
 
 function renderAiPhotoGallery() {
   const gallery = $("#aiPhotoGallery");
+  if (!gallery) return;
   gallery.replaceChildren();
-  AI_PHOTO_VARIANTS.forEach((variant, index) => {
-    const photo = aiPhotos[index];
-    const card = document.createElement("article");
-    card.className = `aiPhotoCard${selectedVariantIndex === index ? " selected" : ""}`;
-    if (!photo) {
-      const placeholder = document.createElement("div");
-      placeholder.className = "aiPhotoPlaceholder";
-      placeholder.textContent = aiPhotoErrors[index] ? `${variant.title}\n${aiPhotoErrors[index]}` : `${variant.title}\nMenunggu hasil AI…`;
-      card.append(placeholder);
-      gallery.append(card);
-      return;
-    }
-
-    const preview = document.createElement("img");
-    preview.src = photo.url;
-    preview.alt = variant.title;
-    const title = document.createElement("strong");
-    title.textContent = variant.title;
-    const detail = document.createElement("small");
-    detail.textContent = variant.description;
-    const actions = document.createElement("div");
-    actions.className = "photoActions";
-    const choose = document.createElement("button");
-    choose.className = "btn primary";
-    choose.type = "button";
-    choose.textContent = selectedVariantIndex === index ? "Foto utama otomatis" : "Jadikan foto utama";
-    choose.disabled = seoRequestBusy;
-    choose.onclick = () => selectAiPhoto(index);
-    const download = document.createElement("button");
-    download.className = "btn outline";
-    download.type = "button";
-    download.textContent = "Unduh foto AI";
-    download.onclick = () => downloadBlob(photo.blob, `foto-ai-${variant.key}.jpg`);
-    actions.append(choose, download);
-    card.append(preview, title, detail, actions);
-    gallery.append(card);
-  });
+  const photo = selectedVariantIndex !== null ? aiPhotos[selectedVariantIndex] : aiPhotos.find(Boolean);
+  if (!photo) {
+    gallery.hidden = true;
+    return;
+  }
+  gallery.hidden = false;
+  const preview = document.createElement("img");
+  preview.className = "singleAiPhotoPreview";
+  preview.src = photo.url;
+  preview.alt = "Foto AI siap";
+  gallery.append(preview);
 }
-
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
