@@ -224,8 +224,8 @@
       </div>
     </section>
     <section class="screen" id="screen2" hidden>
-      <h1 class="screenTitle">Siapkan produk</h1>
-      <p class="screenIntro">Ketik nama produk. AI akan membuat 3 foto berbeda dan konten CEO secara otomatis.</p>
+      <h1 class="screenTitle">Buat Semua Otomatis</h1>
+      <p class="screenIntro">Upload foto dan isi nama atau judul produk. Klik satu tombol, semua hasil dibuat otomatis.</p>
       <div class="panel contextPanel">
         <div class="contextHeading"><span class="contextBadge">✦</span><div><strong>Nama produk untuk CEO</strong><small>AI akan membuat judul, deskripsi, kata kunci, dan narasi dari nama produk serta foto yang Anda pilih.</small></div></div>
         <label class="contextLabel" for="productName">Nama produk (wajib, jangan tulis nama kemasan)</label>
@@ -235,10 +235,10 @@
       <div class="panel">
         <div class="aiPhotoGrid" id="aiPhotoGallery"></div>
         <div class="status" id="editStatus" role="status" aria-live="polite">Tekan tombol untuk membuat 3 foto berbeda dengan AI.</div>
-        <button class="btn primary full" id="generateAiPhotosButton" type="button">Buat 3 Foto Berbeda dengan AI</button>
+        <button class="btn primary full" id="generateAiPhotosButton" type="button" disabled>Buat Semua Otomatis</button>
         <div class="status" id="status" role="status" aria-live="polite"></div>
         <button class="btn outline full" id="retryAiEdits" type="button" hidden>Ulangi foto AI yang gagal</button>
-        <button class="btn primary full" id="generate" type="button" disabled>Buat CEO</button>
+        <button class="btn primary full" id="generate" type="button" hidden disabled>Buat CEO</button>
         <div class="screenActions"><button class="btn outline" id="backToUpload" type="button">Ganti foto</button></div>
       </div>
     </section>
