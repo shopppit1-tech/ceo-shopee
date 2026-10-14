@@ -16,14 +16,18 @@
   const showLogin = () => {
     document.body.classList.add("auth-locked");
     authScreen.hidden = false;
+    window.CEO_AUTH_USER_ID = null;
+    window.dispatchEvent(new CustomEvent("ceo-auth-user-changed", { detail: { userId: null } }));
   };
 
   const setUser = (user) => {
     const email = user?.email || "";
-    if (!email) {
+    if (!email || !user?.id) {
       showLogin();
       return;
     }
+    window.CEO_AUTH_USER_ID = user.id;
+    window.dispatchEvent(new CustomEvent("ceo-auth-user-changed", { detail: { userId: user.id } }));
     document.body.classList.remove("auth-locked");
     authScreen.hidden = true;
     $("profileEmail").textContent = email;

@@ -9,7 +9,11 @@ const palettes = {
   lifestyle: ["#efffdc", "#84cc16", "#14532d"],
   modern: ["#e0f2fe", "#60a5fa", "#1e3a8a"],
 };
-const SAVED_RESULTS_KEY = "foto-seo-shopee.saved-results.v1";
+const SAVED_RESULTS_KEY_PREFIX = "foto-seo-shopee.saved-results.account.v1";
+function getSavedResultsKey() {
+  const userId = String(window.CEO_AUTH_USER_ID || "").trim();
+  return userId ? `${SAVED_RESULTS_KEY_PREFIX}.${encodeURIComponent(userId)}` : null;
+}
 let image = null;
 let imageUrl = null;
 let sourceFile = null;
@@ -75,7 +79,9 @@ function showScreen(step) {
 
 function readSavedResults() {
   try {
-    const value = JSON.parse(localStorage.getItem(SAVED_RESULTS_KEY) || "[]");
+    const storageKey = getSavedResultsKey();
+    if (!storageKey) return [];
+    const value = JSON.parse(localStorage.getItem(storageKey) || "[]");
     return Array.isArray(value) ? value.filter((item) => item && item.id && item.productData) : [];
   } catch {
     return [];
@@ -93,6 +99,8 @@ function createResultThumbnail() {
 
 function saveCurrentResult() {
   if (!productData) return false;
+  const storageKey = getSavedResultsKey();
+  if (!storageKey) return false;
   let thumbnail = "";
   try {
     thumbnail = createResultThumbnail();
@@ -114,7 +122,7 @@ function saveCurrentResult() {
   };
   try {
     const results = [result, ...readSavedResults().filter((item) => item.id !== result.id)].slice(0, 20);
-    localStorage.setItem(SAVED_RESULTS_KEY, JSON.stringify(results));
+    localStorage.setItem(storageKey, JSON.stringify(results));
     activeSavedResultId = result.id;
     renderSavedCollections();
     return true;
@@ -186,9 +194,21 @@ function renderSavedCollections() {
   });
 }
 
+let activeSavedResultsUserId = "";
+window.addEventListener("ceo-auth-user-changed", (event) => {
+  const nextUserId = String(event.detail?.userId || "");
+  if (nextUserId !== activeSavedResultsUserId) {
+    activeSavedResultsUserId = nextUserId;
+    $("#changePhoto").click();
+  }
+  renderSavedCollections();
+});
+
 function deleteSavedResult(id) {
+  const storageKey = getSavedResultsKey();
+  if (!storageKey) return;
   try {
-    localStorage.setItem(SAVED_RESULTS_KEY, JSON.stringify(readSavedResults().filter((item) => item.id !== id)));
+    localStorage.setItem(storageKey, JSON.stringify(readSavedResults().filter((item) => item.id !== id)));
   } catch {
     // The current view remains usable if browser storage is unavailable.
   }
