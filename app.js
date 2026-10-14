@@ -10,6 +10,7 @@ const palettes = {
   modern: ["#e0f2fe", "#60a5fa", "#1e3a8a"],
 };
 const SAVED_RESULTS_KEY_PREFIX = "foto-seo-shopee.saved-results.account.v1";
+const PRODUCT_NAME_KEY = "ceoShopee.productName.v1";
 function getSavedResultsKey() {
   const userId = String(window.CEO_AUTH_USER_ID || "").trim();
   return userId ? `${SAVED_RESULTS_KEY_PREFIX}.${encodeURIComponent(userId)}` : null;
@@ -711,7 +712,7 @@ function selectAiPhoto(index) {
   $("#selectedPhotoLabel").textContent = AI_PHOTO_VARIANTS[index].title;
   resetGeneratedCopy();
   $("#bgBadge").textContent = `${AI_PHOTO_VARIANTS[index].title} dipilih`;
-  $("#status").textContent = "Foto dipilih. Isi nama produk, lalu tekan Buat SEO.";
+  $("#status").textContent = "Nama produk tersimpan. Tekan Buat SEO untuk membuat konten CEO.";
   $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
   $("#generateAiPhotosButton").hidden = true;
@@ -723,7 +724,7 @@ function selectAiPhoto(index) {
   $("#generate").disabled = !getProductName() || !syncProductContext();
   $("#status").textContent = $("#generate").disabled
     ? "Lengkapi nama dan deskripsi produk, lalu tekan Buat SEO."
-    : "Foto dipilih. Tekan Buat SEO jika ingin membuat judul dan deskripsi.";
+    : "Nama produk tersimpan. Tekan Buat SEO jika ingin membuat konten otomatis.";
 }
 
 async function generateAiPhotos(file, runId) {
@@ -839,7 +840,7 @@ $("#photo").onchange = (event) => {
     $("#photoPreview").hidden = false;
     $("#uploadTitle").textContent = file.name;
     $("#bgBadge").textContent = "Foto asli · tekan tombol untuk mulai";
-    $("#status").textContent = "Foto diterima. Isi nama produk, lalu tekan Buat Foto dengan AI jika diperlukan.";
+    $("#status").textContent = "Foto diterima. Ketik nama produk sekali, lalu tekan Buat Foto dengan AI.";
     $("#videoStatus").textContent = "Buat SEO terlebih dahulu, lalu satu tombol akan membuat video Shorts dengan suara AI.";
     $("#retryAiEdits").hidden = true;
     showScreen(2);
@@ -991,7 +992,12 @@ const updateSeoReadiness = () => {
     $("#status").textContent = "Nama produk siap. Tekan Buat SEO agar AI membuat konten otomatis.";
   }
 };
-$("#productName")?.addEventListener("input", updateSeoReadiness);
+const savedProductName = (() => { try { return localStorage.getItem(PRODUCT_NAME_KEY) || ""; } catch (_) { return ""; } })();
+if ($("#productName") && savedProductName) $("#productName").value = savedProductName;
+$("#productName")?.addEventListener("input", () => {
+  try { localStorage.setItem(PRODUCT_NAME_KEY, $("#productName").value.trim()); } catch (_) {}
+  updateSeoReadiness();
+});
 
 $("#format").onchange = renderAll;
 
