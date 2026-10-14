@@ -699,6 +699,8 @@ function selectAiPhoto(index) {
   $("#status").textContent = "Membuat SEO dari foto pilihan…";
   $("#videoStatus").textContent = "Judul dan deskripsi sedang disiapkan.";
   $("#generate").hidden = true;
+  $("#generateAiPhotosButton").hidden = false;
+  $("#generateAiPhotosButton").disabled = false;
   $("#generate").textContent = "Buat SEO";
   renderAiPhotoGallery();
   renderAll();
